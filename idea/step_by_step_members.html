@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Step-by-step theo từng thành viên — Personal Knowledge Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEAE0; --paper-deep:#E4DDCC; --ink:#20262A; --ink-soft:#565F60;
+    --line:#CFC6AE; --gold:#A9793C; --card:#F7F4EC; --radius:3px;
+    --a:#3C6E5D; --b:#3E6B8A; --c:#A9793C; --d:#7A5C99; --e:#9C4A3A;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; font-size:16px; line-height:1.6;}
+  h1,h2,h3,h4{font-family:'Fraunces',serif; font-weight:600; color:var(--ink); letter-spacing:-0.01em;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:0.87em; background:var(--paper-deep); padding:1px 5px; border-radius:2px;}
+
+  .shell{display:grid; grid-template-columns:240px 1fr; max-width:1300px; margin:0 auto;}
+  @media (max-width:900px){.shell{grid-template-columns:1fr;} nav.toc{position:static !important; height:auto !important; border-right:none !important; border-bottom:1px solid var(--line);}}
+  nav.toc{position:sticky; top:0; height:100vh; overflow-y:auto; padding:32px 18px 40px 28px; border-right:1px solid var(--line);}
+  nav.toc .brand{font-family:'Fraunces',serif; font-size:1rem; font-weight:600; margin-bottom:2px;}
+  nav.toc .brand-sub{font-size:0.75rem; color:var(--ink-soft); margin-bottom:22px;}
+  nav.toc ol{list-style:none; margin:0 0 4px; padding:0;}
+  nav.toc a{display:flex; gap:10px; align-items:center; text-decoration:none; color:var(--ink-soft); font-size:0.86rem; padding:9px 10px; border-radius:var(--radius); border-left:3px solid transparent; transition:background .15s,color .15s;}
+  nav.toc a .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  nav.toc a:hover, nav.toc a.active{background:var(--paper-deep); color:var(--ink);}
+  nav.toc a.active{border-left-color:var(--member-color, var(--gold));}
+  nav.toc .role-full{font-size:0.7rem; color:var(--ink-soft); margin-left:19px; margin-top:-6px; margin-bottom:6px;}
+
+  main{padding:50px 54px 120px; min-width:0;}
+  @media (max-width:900px){main{padding:32px 20px 90px;}}
+  header.hero{margin-bottom:44px; padding-bottom:30px; border-bottom:1px solid var(--line);}
+  header.hero .kicker{font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--gold); margin-bottom:10px;}
+  header.hero h1{font-size:2.1rem; line-height:1.18; margin:0 0 12px; max-width:36ch;}
+  header.hero p{font-size:0.96rem; color:var(--ink-soft); max-width:74ch; margin:0;}
+
+  section.member{margin-bottom:56px; scroll-margin-top:20px;}
+  .member-head{display:flex; align-items:center; gap:14px; padding-bottom:14px; border-bottom:2px solid var(--member-color); margin-bottom:6px;}
+  .member-head .big-dot{width:16px; height:16px; border-radius:50%; background:var(--member-color); flex-shrink:0;}
+  .member-head h2{font-size:1.5rem; margin:0;}
+  .member-head .role-tag{font-size:0.85rem; color:var(--ink-soft);}
+  .member-mission{background:var(--card); border-left:3px solid var(--member-color); padding:12px 16px; margin:14px 0 22px; font-size:0.9rem;}
+  .member-mission b{color:var(--ink);}
+
+  ol.steps{list-style:none; margin:0; padding:0; counter-reset:step; border-top:1px solid var(--line);}
+  ol.steps > li{counter-increment:step; display:grid; grid-template-columns:80px 1fr; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);}
+  ol.steps > li::before{content:"Tuần " counter(step); font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--member-color); padding-top:2px; font-weight:500;}
+  ol.steps h4{font-size:0.98rem; margin:0 0 6px; font-family:'IBM Plex Sans',sans-serif; font-weight:600;}
+  ol.steps ul{margin:6px 0 8px; padding-left:18px;}
+  ol.steps li li{font-size:0.87rem; color:var(--ink-soft); margin-bottom:4px;}
+  .step-meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .tag{font-size:0.7rem; font-family:'IBM Plex Mono',monospace; padding:2px 8px; border-radius:20px; background:var(--paper-deep); color:var(--ink-soft);}
+  .tag.tool{color:var(--member-color); background:color-mix(in srgb, var(--member-color) 12%, var(--card));}
+  .deliverable{margin-top:8px; font-size:0.85rem;}
+  .deliverable span{color:var(--ink-soft);}
+
+  footer{border-top:1px solid var(--line); padding-top:20px; font-size:0.8rem; color:var(--ink-soft); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="brand">Step-by-step</div>
+    <div class="brand-sub">Theo từng thành viên · 12 tuần</div>
+    <ol>
+      <li><a href="#member-a" style="--member-color:var(--a);"><span class="dot" style="background:var(--a);"></span>A — Data & Ingestion</a></li>
+      <li><a href="#member-b" style="--member-color:var(--b);"><span class="dot" style="background:var(--b);"></span>B — Retrieval Engineer</a></li>
+      <li><a href="#member-c" style="--member-color:var(--c);"><span class="dot" style="background:var(--c);"></span>C — LLM/RAG Engineer</a></li>
+      <li><a href="#member-d" style="--member-color:var(--d);"><span class="dot" style="background:var(--d);"></span>D — Evaluation & Frontend</a></li>
+      <li><a href="#member-e" style="--member-color:var(--e);"><span class="dot" style="background:var(--e);"></span>E — Research/PM/QA</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">STEP-BY-STEP CÁ NHÂN — 12 TUẦN</div>
+      <h1>Từng bước cụ thể cho mỗi thành viên</h1>
+      <p>Chi tiết hoá bảng phân công theo tuần thành các bước làm việc cụ thể cho từng người — có công cụ, deliverable rõ ràng mỗi tuần. Dùng để mỗi thành viên tự theo dõi tiến độ cá nhân độc lập với bảng tổng.</p>
+    </header>
+
+    <!-- MEMBER A -->
+    <section class="member" id="member-a" style="--member-color:var(--a);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>A — Data & Ingestion</h2><div class="role-tag">Corpus, parsing, OCR, metadata, dataset QA, word segmentation</div></div></div>
+      <div class="member-mission"><b>Sứ mệnh:</b> Biến tài liệu thô (PDF/DOCX/PPTX/scan) thành dữ liệu sạch, có cấu trúc, có provenance — nền tảng cho mọi module phía sau.</div>
+      <ol class="steps">
+        <li><div>
+          <h4>Khảo sát nguồn & lập kế hoạch thu thập</h4>
+          <ul>
+            <li>Liệt kê toàn bộ tài liệu nhóm đang có (slide, giáo trình, notes) theo môn/chủ đề</li>
+            <li>Ước lượng số lượng còn thiếu so với mục tiêu corpus (đủ đa dạng layout, có phần "dirty data" thật)</li>
+            <li>Viết kế hoạch thu thập: nguồn bổ sung nếu thiếu, định dạng ưu tiên</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Khảo sát</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Data collection plan (1 trang)</div>
+        </div></li>
+        <li><div>
+          <h4>Thu thập & gán metadata ban đầu</h4>
+          <ul>
+            <li>Tập hợp tài liệu thật vào thư mục theo doc_id</li>
+            <li>Ghi metadata: filename, loại tài liệu, nguồn, số trang, ngày</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Pandas</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus v0 + bảng metadata thô</div>
+        </div></li>
+        <li><div>
+          <h4>Build parser đa định dạng + OCR</h4>
+          <ul>
+            <li>Viết parser PDF (giữ page number), DOCX, PPTX (giữ slide/section)</li>
+            <li>Test OCR trên tài liệu ảnh scan, so sánh Tesseract vs EasyOCR trên vài mẫu</li>
+            <li>Ghi nhận failure mode: mất cột, sai thứ tự, mất tiêu đề</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">PyMuPDF</span><span class="tag tool">python-docx</span><span class="tag tool">python-pptx</span><span class="tag tool">Tesseract/EasyOCR</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Ingestion script chạy được trên toàn bộ corpus v0</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện metadata schema + cleaning</h4>
+          <ul>
+            <li>Chốt schema đầy đủ (doc_id, filename, type, source, page, section)</li>
+            <li>Viết bước cleaning: loại ký tự rác nhưng giữ nguyên thông tin có nghĩa (không xóa nhầm số liệu)</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Regex</span><span class="tag tool">Pandas</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus sạch, có schema thống nhất</div>
+        </div></li>
+        <li><div>
+          <h4>Tích hợp word segmentation tiếng Việt</h4>
+          <ul>
+            <li>Cài và test <code>underthesea</code> hoặc <code>pyvi</code> trên mẫu văn bản đã cleaning</li>
+            <li>Chạy segmentation cho toàn bộ corpus, lưu bản đã segment song song bản gốc (phục vụ BM25 ở nhóm B)</li>
+            <li>Kiểm tra thủ công 10-15 câu xem tách từ có hợp lý không (đặc biệt thuật ngữ chuyên ngành)</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">underthesea/pyvi</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus đã segment, sẵn sàng cho B build BM25</div>
+        </div></li>
+        <li><div>
+          <h4>Mở rộng corpus nếu thiếu đa dạng</h4>
+          <ul>
+            <li>Rà soát lại corpus sau khi có early signal benchmark từ nhóm D — bổ sung ngành/loại tài liệu còn thiếu</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Bổ sung dữ liệu</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus v1 (mở rộng)</div>
+        </div></li>
+        <li><div>
+          <h4>Hỗ trợ mở rộng cho evaluation set</h4>
+          <ul>
+            <li>Cung cấp thêm tài liệu/đoạn văn nếu nhóm D cần đa dạng hoá loại query khi build evaluation set 280-320 câu</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Hỗ trợ</span></div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện corpus final</h4>
+          <ul>
+            <li>Chốt phiên bản corpus cuối cùng dùng cho benchmark chính thức — không thay đổi sau tuần này</li>
+            <li>Viết datasheet mô tả corpus (nguồn, số lượng, phân bố loại tài liệu)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Freeze</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus final + datasheet</div>
+        </div></li>
+        <li><div>
+          <h4>Hỗ trợ debug khi chạy full benchmark</h4>
+          <ul>
+            <li>Túc trực xử lý các vấn đề liên quan dữ liệu phát sinh khi B/C chạy full benchmark (file lỗi, encoding, thiếu metadata)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Debug</span></div>
+        </div></li>
+        <li><div>
+          <h4>Phân loại lỗi liên quan data/parsing</h4>
+          <ul>
+            <li>Đọc các câu trả lời sai, xác định lỗi nào bắt nguồn từ parsing/OCR (mất heading, sai bảng, OCR sai ký tự)</li>
+            <li>Thống kê tần suất từng loại lỗi thuộc nhóm data</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Error analysis</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Báo cáo lỗi nhóm data, đóng góp vào error taxonomy chung</div>
+        </div></li>
+        <li><div>
+          <h4>Hỗ trợ OCR mở rộng (nếu còn thời gian)</h4>
+          <ul>
+            <li>Nếu pipeline text đã ổn định, thử mở rộng query bằng ảnh (OCR câu hỏi input)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Extension</span></div>
+        </div></li>
+        <li><div>
+          <h4>Rà soát cuối cùng</h4>
+          <ul>
+            <li>Kiểm tra lại corpus + documentation, đảm bảo README mô tả rõ cách tái tạo corpus từ nguồn thô</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Finalization</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Corpus documentation hoàn chỉnh trong repo</div>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- MEMBER B -->
+    <section class="member" id="member-b" style="--member-color:var(--b);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>B — Retrieval Engineer</h2><div class="role-tag">Embedding, vector store, BM25, hybrid, reranking</div></div></div>
+      <div class="member-mission"><b>Sứ mệnh:</b> Xây và benchmark toàn bộ "nấc thang" retrieval từ Dense → BM25 → Hybrid → Reranker, đảm bảo mỗi nấc có số liệu chứng minh đóng góp.</div>
+      <ol class="steps">
+        <li><div>
+          <h4>Research embedding model & vector store</h4>
+          <ul>
+            <li>Shortlist 2-3 embedding model tiếng Việt/đa ngôn ngữ (vd bge-m3, Vietnamese-SBERT)</li>
+            <li>So sánh FAISS vs Qdrant, chọn phương án MVP (ưu tiên FAISS vì dễ tái lập)</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Sentence-Transformers</span><span class="tag tool">FAISS/Qdrant</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Bảng so sánh ứng viên + quyết định MVP</div>
+        </div></li>
+        <li><div>
+          <h4>Sanity-check embedding model</h4>
+          <ul>
+            <li>Test similarity thủ công trên vài đoạn mẫu, kiểm tra model có phân biệt được ngữ nghĩa tiếng Việt tốt không</li>
+            <li>Chốt embedding model chính thức cho MVP</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Sanity check</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Embedding model đã chốt</div>
+        </div></li>
+        <li><div>
+          <h4>Setup FAISS pipeline</h4>
+          <ul>
+            <li>Cài đặt FAISS, test indexing với dữ liệu dummy để xác nhận pipeline chạy đúng</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">FAISS</span></div>
+          <div class="deliverable"><span>Deliverable:</span> FAISS pipeline test pass</div>
+        </div></li>
+        <li><div>
+          <h4>Implement chunking + build dense index</h4>
+          <ul>
+            <li>Implement 3 chiến lược chunking (256/512/1024 token, có overlap)</li>
+            <li>Build dense embedding index cho toàn bộ corpus với từng chunk size</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">LangChain/LlamaIndex text splitters</span></div>
+          <div class="deliverable"><span>Deliverable:</span> 3 bộ index tương ứng 3 chunk size</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện Dense (S1) + build BM25 (S2)</h4>
+          <ul>
+            <li>Đưa Dense retrieval lên mức production-ready (query → top-k chunk ổn định)</li>
+            <li>Implement BM25 trên corpus <b>đã segment</b> từ A — kiểm tra tokenizer khớp giữa index và query</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">rank_bm25/Elasticsearch</span></div>
+          <div class="deliverable"><span>Deliverable:</span> S1 và S2 chạy độc lập, sẵn sàng nối generation</div>
+        </div></li>
+        <li><div>
+          <h4>Implement Hybrid fusion (S3)</h4>
+          <ul>
+            <li>Ghép Dense + BM25 bằng Reciprocal Rank Fusion (RRF)</li>
+            <li>Test candidate union không bị trùng lặp/lệch trọng số bất hợp lý</li>
+          </ul>
+          <div class="step-meta"><span class="tag">RRF</span></div>
+          <div class="deliverable"><span>Deliverable:</span> S3 chạy được, sẵn sàng cho benchmark early signal</div>
+        </div></li>
+        <li><div>
+          <h4>Implement Reranker (S4)</h4>
+          <ul>
+            <li>Tích hợp cross-encoder reranker (bge-reranker) sau bước fusion</li>
+            <li>Đo latency p50/p95 so với S3, ghi log rõ ràng để so sánh trade-off</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">bge-reranker (Cross-Encoder)</span></div>
+          <div class="deliverable"><span>Deliverable:</span> S4 + bảng latency</div>
+        </div></li>
+        <li><div>
+          <h4>Freeze cấu hình retrieval</h4>
+          <ul>
+            <li>Chốt embedding model, chunk size, K (candidate size) cho benchmark chính thức — không đổi sau mốc này</li>
+            <li>Ghi lại toàn bộ config vào file version-controlled</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Freeze</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Config file cố định cho S1-S4</div>
+        </div></li>
+        <li><div>
+          <h4>Chạy full benchmark chính thức</h4>
+          <ul>
+            <li>Chạy S0-S4 trên evaluation set 280-320 câu đã freeze</li>
+            <li>Lưu raw retrieval results (không chỉ số liệu tổng hợp) để D dùng cho bootstrap CI</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Full benchmark</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Raw retrieval logs cho toàn bộ 5 hệ thống</div>
+        </div></li>
+        <li><div>
+          <h4>Phân tích lỗi retrieval</h4>
+          <ul>
+            <li>Xác định câu hỏi nào bị recall thấp, sai chunk, một retriever thống trị bất hợp lý trong fusion</li>
+            <li>Tinh chỉnh nếu phát hiện vấn đề còn khắc phục được trong thời gian còn lại</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Error analysis</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Báo cáo lỗi nhóm retrieval</div>
+        </div></li>
+        <li><div>
+          <h4>Tối ưu nốt & ổn định hoá</h4>
+          <ul>
+            <li>Xử lý các vấn đề retrieval còn sót từ error analysis tuần trước</li>
+            <li>Đảm bảo pipeline chạy ổn định cho demo</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Stabilization</span></div>
+        </div></li>
+        <li><div>
+          <h4>Cleanup & README</h4>
+          <ul>
+            <li>Dọn code retrieval modules, viết README hướng dẫn tái lập (cách build index, cách chạy từng baseline)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Finalization</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Retrieval module hoàn chỉnh + README</div>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- MEMBER C -->
+    <section class="member" id="member-c" style="--member-color:var(--c);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>C — LLM/RAG Engineer</h2><div class="role-tag">Prompting, context assembly, citation, abstention</div></div></div>
+      <div class="member-mission"><b>Sứ mệnh:</b> Biến evidence đã retrieve thành câu trả lời grounded, có citation đúng nguồn, và biết từ chối khi thiếu bằng chứng.</div>
+      <ol class="steps">
+        <li><div>
+          <h4>Research LLM API & draft prompt v0</h4>
+          <ul>
+            <li>So sánh 2-3 LLM API theo tiêu chí quality/cost/latency (vd GPT-4o-mini, Gemini Flash, Qwen)</li>
+            <li>Viết draft system prompt v0: yêu cầu grounded generation + rule abstention cơ bản</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Research</span></div>
+          <div class="deliverable"><span>Deliverable:</span> LLM API đã chọn + prompt v0</div>
+        </div></li>
+        <li><div>
+          <h4>Prompt template v1 + test API</h4>
+          <ul>
+            <li>Viết prompt template có format citation cụ thể (document/page)</li>
+            <li>Test gọi API thực tế, đo latency/cost cơ bản trên vài request mẫu</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">OpenAI/Gemini API</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Prompt template v1</div>
+        </div></li>
+        <li><div>
+          <h4>Setup backend skeleton</h4>
+          <ul>
+            <li>Setup FastAPI backend, định nghĩa endpoint cơ bản (upload, query)</li>
+            <li>Kết nối test call LLM API qua backend, xử lý lỗi cơ bản (timeout, rate limit)</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">FastAPI</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Backend skeleton chạy được</div>
+        </div></li>
+        <li><div>
+          <h4>Demo retrieval thô (chưa generation)</h4>
+          <ul>
+            <li>Nối API để test query → top-k chunk trả về (chưa qua LLM) — kiểm tra retrieval trước khi ghép generation</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Integration test</span></div>
+        </div></li>
+        <li><div>
+          <h4>Nối generation với Dense retrieval → S1 end-to-end</h4>
+          <ul>
+            <li>Ghép retrieval (từ B) + LLM generation thành pipeline hoàn chỉnh đầu tiên</li>
+            <li>Hoàn thiện grounded prompt: chỉ dùng context được cung cấp, có câu trả lời "không tìm thấy" khi thiếu bằng chứng</li>
+          </ul>
+          <div class="step-meta"><span class="tag">S1 end-to-end</span></div>
+          <div class="deliverable"><span>Deliverable:</span> S1 chạy được từ query đến answer + citation</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện citation & abstention logic</h4>
+          <ul>
+            <li>Chuẩn hoá định dạng citation (document/chunk/page) nhất quán trong mọi câu trả lời</li>
+            <li>Test kỹ rule abstention với các câu hỏi cố ý không có đáp án trong corpus</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Prompt engineering</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Citation + abstention hoạt động ổn định trên S1-S3</div>
+        </div></li>
+        <li><div>
+          <h4>Multi-document context assembly</h4>
+          <ul>
+            <li>Cài đặt quy tắc group context theo doc_id, chèn header nguồn (<code>[Nguồn: {filename}, trang {page}]</code>) trước mỗi group</li>
+            <li>Xử lý trường hợp vượt token budget: cắt đều theo document thay vì ưu tiên 1 document</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Context engineering</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Context assembly xử lý đúng câu hỏi multi-document</div>
+        </div></li>
+        <li><div>
+          <h4>Freeze prompt & generation config</h4>
+          <ul>
+            <li>Chốt phiên bản prompt template và tham số generation (temperature, max token) cho benchmark chính thức</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Freeze</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Prompt/config version cố định</div>
+        </div></li>
+        <li><div>
+          <h4>Hỗ trợ debug generation trong full benchmark</h4>
+          <ul>
+            <li>Túc trực xử lý lỗi API (timeout, rate limit), lỗi format citation khi chạy full benchmark</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Debug</span></div>
+        </div></li>
+        <li><div>
+          <h4>Phân tích lỗi generation</h4>
+          <ul>
+            <li>Đọc câu trả lời sai, phân loại: hallucination, sai citation, sai đơn vị/kỳ, không tuân thủ abstention</li>
+            <li>Tinh chỉnh prompt nếu phát hiện pattern lỗi sửa được nhanh</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Error analysis</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Báo cáo lỗi nhóm generation</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện API cho demo</h4>
+          <ul>
+            <li>Hoàn thiện toàn bộ endpoint, kết nối đầy đủ với frontend (từ D)</li>
+            <li>Đảm bảo error handling đầy đủ cho kịch bản demo trực tiếp</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Integration</span></div>
+          <div class="deliverable"><span>Deliverable:</span> API sẵn sàng cho release candidate</div>
+        </div></li>
+        <li><div>
+          <h4>Cleanup & README</h4>
+          <ul>
+            <li>Dọn code generation pipeline, viết README (cách chạy, cách đổi LLM/prompt)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Finalization</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Generation module hoàn chỉnh + README</div>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- MEMBER D -->
+    <section class="member" id="member-d" style="--member-color:var(--d);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>D — Evaluation & Frontend</h2><div class="role-tag">Metrics, RAGAS/NLI eval, UI, dashboards</div></div></div>
+      <div class="member-mission"><b>Sứ mệnh:</b> Đảm bảo mọi khẳng định về hệ thống đều có số liệu đứng sau, và người dùng có giao diện để thấy kết quả đó.</div>
+      <ol class="steps">
+        <li><div>
+          <h4>Research metrics & draft schema evaluation set</h4>
+          <ul>
+            <li>Đọc RAGAS, NLI-based faithfulness scoring — hiểu cách đo groundedness</li>
+            <li>Draft schema: question, gold answer, gold chunk(s), query_type</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Research</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Schema evaluation set v0</div>
+        </div></li>
+        <li><div>
+          <h4>Setup annotation tool + QA seed</h4>
+          <ul>
+            <li>Setup Label Studio với schema đã chốt</li>
+            <li>Viết 30-50 câu QA seed (pilot) từ corpus đã có</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Label Studio</span></div>
+          <div class="deliverable"><span>Deliverable:</span> QA seed v0 (30-50 câu)</div>
+        </div></li>
+        <li><div>
+          <h4>Unit test ingestion output</h4>
+          <ul>
+            <li>Viết test kiểm tra page/section mapping của A có đúng không (so với file gốc)</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Testing</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Test suite cho ingestion</div>
+        </div></li>
+        <li><div>
+          <h4>Script đo recall@k theo chunk size</h4>
+          <ul>
+            <li>Viết script đo recall@k trên QA seed cho từng chunk size (256/512/1024) mà B đã build</li>
+            <li>Báo cáo kết quả để cả nhóm chọn chunk size mặc định</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Python</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Bảng recall@k theo chunk size</div>
+        </div></li>
+        <li><div>
+          <h4>Unit test tokenizer + script EM/F1 sơ bộ</h4>
+          <ul>
+            <li>Viết unit test: cùng input phải ra cùng token ở pipeline index và pipeline query (bắt lỗi lệch tokenizer sớm)</li>
+            <li>Viết script đo EM/F1 sơ bộ cho S1 trên QA seed</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Testing</span><span class="tag">Metrics</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Tokenizer test pass + EM/F1 sơ bộ cho S1</div>
+        </div></li>
+        <li><div>
+          <h4>Benchmark early signal S0-S3</h4>
+          <ul>
+            <li>Chạy benchmark sơ bộ 4 hệ thống trên QA seed (30-50 câu) để có tín hiệu sớm trước khi đầu tư tiếp vào S4</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Pilot benchmark</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Bảng early signal S0 vs S1 vs S2 vs S3</div>
+        </div></li>
+        <li><div>
+          <h4>Implement NLI faithfulness scorer</h4>
+          <ul>
+            <li>Bắt đầu code module NLI entailment check: tách claim từ câu trả lời, so với context để phân loại entailment/contradiction/neutral</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">mDeBERTa-NLI</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Faithfulness scorer v0</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện evaluation set + đo đồng thuận</h4>
+          <ul>
+            <li>Mở rộng QA seed lên 280-320 câu, đảm bảo tối thiểu 45 câu/loại query</li>
+            <li>Cross-review 20% mẫu, tính Cohen's Kappa với người tạo gốc</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Annotation QA</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Evaluation set final + báo cáo Kappa</div>
+        </div></li>
+        <li><div>
+          <h4>Tính toàn bộ metrics + ablation</h4>
+          <ul>
+            <li>Chạy EM/F1, RAGAS, faithfulness, citation correctness cho cả 5 baseline trên kết quả full benchmark (từ B, C)</li>
+            <li>Tính bootstrap confidence interval (1000 resample) cho từng so sánh</li>
+            <li>Chạy ablation study: tắt từng thành phần để đo đóng góp riêng lẻ</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">RAGAS</span><span class="tag">Bootstrap CI</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Evaluation report v1 đầy đủ</div>
+        </div></li>
+        <li><div>
+          <h4>Tổng hợp error taxonomy</h4>
+          <ul>
+            <li>Gộp báo cáo lỗi từ A, B, C thành 1 taxonomy thống nhất</li>
+            <li>Thống kê tần suất từng loại lỗi theo model/query type, vẽ biểu đồ phân bố</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Matplotlib/Seaborn</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Error taxonomy + biểu đồ</div>
+        </div></li>
+        <li><div>
+          <h4>Xây dashboard UI</h4>
+          <ul>
+            <li>Xây giao diện hiển thị kết quả/biểu đồ metrics cho demo (bảng so sánh baseline, biểu đồ lỗi)</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Streamlit</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Dashboard tích hợp vào demo</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện bảng/biểu đồ kết quả cuối</h4>
+          <ul>
+            <li>Chuẩn hoá toàn bộ bảng/biểu đồ dùng cho report và slide cuối cùng</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Finalization</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Bộ bảng/biểu đồ final cho report + slide</div>
+        </div></li>
+      </ol>
+    </section>
+
+    <!-- MEMBER E -->
+    <section class="member" id="member-e" style="--member-color:var(--e);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>E — Research/PM/QA</h2><div class="role-tag">RQ, experiment protocol, report, integration testing</div></div></div>
+      <div class="member-mission"><b>Sứ mệnh:</b> Giữ cả nhóm đi đúng hướng nghiên cứu, đảm bảo chất lượng annotation, và chịu trách nhiệm sản phẩm cuối (report + demo).</div>
+      <ol class="steps">
+        <li><div>
+          <h4>Hoàn thiện đề cương & setup hạ tầng làm việc</h4>
+          <ul>
+            <li>Nộp đề cương xin duyệt, chốt RQ và giả thuyết cùng cả nhóm</li>
+            <li>Setup GitHub repo (cấu trúc thư mục, coding convention), task board</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">GitHub</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Approved proposal + repo/task board sẵn sàng</div>
+        </div></li>
+        <li><div>
+          <h4>Review corpus & QA seed đầu tiên</h4>
+          <ul>
+            <li>Kiểm tra corpus A thu thập có đủ đa dạng không, góp ý bổ sung</li>
+            <li>Review 30-50 câu QA seed từ D, sửa câu mơ hồ trước khi dùng làm test v0</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Review</span></div>
+        </div></li>
+        <li><div>
+          <h4>Review ingestion & cập nhật risk log</h4>
+          <ul>
+            <li>Review code ingestion của A, kiểm tra output có đúng kỳ vọng không</li>
+            <li>Cập nhật risk log (rủi ro parsing, OCR) với dấu hiệu sớm cần theo dõi</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Risk management</span></div>
+        </div></li>
+        <li><div>
+          <h4>Review chunk quality & chốt cấu hình</h4>
+          <ul>
+            <li>Đọc mẫu chunk thủ công, đánh giá có đủ ngữ cảnh không</li>
+            <li>Dựa trên số liệu recall@k của D, chốt chunk size mặc định cho MVP</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Decision</span></div>
+        </div></li>
+        <li><div>
+          <h4>Review S1 pilot & họp mid-sprint</h4>
+          <ul>
+            <li>Xem kết quả S1 end-to-end đầu tiên, đối chiếu với kỳ vọng RQ1</li>
+            <li>Tổ chức họp mid-sprint điều chỉnh phân công nếu có thành viên trễ tiến độ</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Sync</span></div>
+        </div></li>
+        <li><div>
+          <h4>Điều phối demo nội bộ đầu tiên</h4>
+          <ul>
+            <li>Tổ chức buổi demo nội bộ cho MVP end-to-end (S0-S3), ghi nhận vấn đề phát sinh từ góc nhìn người dùng</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Demo</span></div>
+        </div></li>
+        <li><div>
+          <h4>Quyết định trade-off reranker</h4>
+          <ul>
+            <li>Dựa trên số liệu latency của B, quyết định threshold candidate K cân bằng quality/latency</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Decision</span></div>
+        </div></li>
+        <li><div>
+          <h4>Điều phối annotation & đảm bảo Kappa</h4>
+          <ul>
+            <li>Giám sát quá trình cross-review evaluation set của D</li>
+            <li>Nếu Cohen's Kappa &lt; 0.6: tổ chức thảo luận thống nhất tiêu chí gán nhãn, phân xử các trường hợp bất đồng còn lại</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Quality control</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Xác nhận Kappa ≥0.6 trước khi cho phép freeze config</div>
+        </div></li>
+        <li><div>
+          <h4>Giám sát ngân sách & tổng hợp kết quả</h4>
+          <ul>
+            <li>Theo dõi chi phí API thực tế so với cap đã định (mục 18 Proposal v2) trong tuần chạy full benchmark</li>
+            <li>Tổng hợp kết quả sơ bộ từ B, C, D thành bản nháp đầu tiên</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Budget monitoring</span></div>
+        </div></li>
+        <li><div>
+          <h4>Viết báo cáo phân tích lỗi</h4>
+          <ul>
+            <li>Tổng hợp error taxonomy từ D thành văn bản mạch lạc — input trực tiếp cho chương Results/Discussion</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Writing</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Draft chương Error Analysis</div>
+        </div></li>
+        <li><div>
+          <h4>Viết Chương 1-4 báo cáo + outline slide</h4>
+          <ul>
+            <li>Viết Introduction, Related Work, Dataset, Methodology (phần không phụ thuộc kết quả cuối)</li>
+            <li>Lên outline slide trình bày</li>
+          </ul>
+          <div class="step-meta"><span class="tag tool">Overleaf/LaTeX</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Draft Chương 1-4 + outline slide</div>
+        </div></li>
+        <li><div>
+          <h4>Hoàn thiện report, slide, demo & rehearsal</h4>
+          <ul>
+            <li>Ghép toàn bộ chương còn lại (Results, Discussion, Conclusion) với số liệu final từ D</li>
+            <li>Hoàn thiện slide, viết script demo, tổ chức rehearsal toàn nhóm ít nhất 1 lần</li>
+          </ul>
+          <div class="step-meta"><span class="tag">Finalization</span></div>
+          <div class="deliverable"><span>Deliverable:</span> Report + slide + demo script hoàn chỉnh</div>
+        </div></li>
+      </ol>
+    </section>
+
+    <footer>Mỗi thành viên có thể dùng riêng phần của mình làm checklist cá nhân — vẫn cần đối chiếu với bảng tổng theo tuần để không lệch tiến độ giữa các role phụ thuộc lẫn nhau (vd: C phụ thuộc output của B, D phụ thuộc output của cả B và C).</footer>
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('nav.toc a[href^="#"]');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  function onScroll(){
+    let current = sections[0];
+    const scrollPos = window.scrollY + 120;
+    for(const s of sections){ if(s.offsetTop <= scrollPos) current = s; }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current.id));
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>

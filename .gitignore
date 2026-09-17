@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data and generated artifacts
+data/raw/*
+data/processed/*
+data/indexes/*
+data/evaluation/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/indexes/.gitkeep
+!data/evaluation/.gitkeep
+
+# Large model/cache artifacts
+models/
+*.faiss
+*.pkl
+*.sqlite
+*.db
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

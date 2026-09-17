@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal v2 — Personal Knowledge Assistant (RAG + LLM)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEAE0; --paper-deep:#E4DDCC; --ink:#20262A; --ink-soft:#565F60;
+    --line:#CFC6AE; --ledger:#3C6E5D; --ledger-deep:#28483C; --gold:#A9793C;
+    --card:#F7F4EC; --danger:#9C4A3A; --fix:#8A4B2E; --fix-bg:#F3E4D6; --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; font-size:16px; line-height:1.65;}
+  h1,h2,h3,h4{font-family:'Fraunces',serif; font-weight:600; color:var(--ink); letter-spacing:-0.01em;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:0.88em; background:var(--paper-deep); padding:1px 5px; border-radius:2px;}
+  .shell{display:grid; grid-template-columns:280px 1fr; max-width:1280px; margin:0 auto;}
+  @media (max-width:900px){.shell{grid-template-columns:1fr;} nav.toc{position:static !important; height:auto !important; border-right:none !important; border-bottom:1px solid var(--line);}}
+  nav.toc{position:sticky; top:0; height:100vh; overflow-y:auto; padding:32px 20px 40px 30px; border-right:1px solid var(--line);}
+  nav.toc .brand{font-family:'Fraunces',serif; font-size:1rem; font-weight:600; line-height:1.3; margin-bottom:2px;}
+  nav.toc .brand-sub{font-size:0.76rem; color:var(--ink-soft); margin-bottom:22px;}
+  nav.toc ol{list-style:none; margin:0; padding:0;}
+  nav.toc li{margin-bottom:1px;}
+  nav.toc a{display:flex; gap:9px; align-items:baseline; text-decoration:none; color:var(--ink-soft); font-size:0.83rem; padding:6px 8px; border-radius:var(--radius); transition:background .15s,color .15s;}
+  nav.toc a .n{font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--gold); flex-shrink:0; width:18px;}
+  nav.toc a:hover, nav.toc a.active{background:var(--paper-deep); color:var(--ink);}
+  nav.toc .grp{font-size:0.7rem; color:var(--ink-soft); margin:16px 0 5px 8px; border-top:1px solid var(--line); padding-top:12px;}
+  nav.toc .grp:first-of-type{border-top:none; margin-top:0; padding-top:0;}
+  main{padding:52px 54px 120px; min-width:0;}
+  @media (max-width:900px){main{padding:34px 20px 90px;}}
+  header.hero{margin-bottom:44px; padding-bottom:32px; border-bottom:1px solid var(--line);}
+  header.hero .kicker{font-family:'IBM Plex Mono',monospace; font-size:0.76rem; color:var(--gold); margin-bottom:12px;}
+  header.hero h1{font-size:2.3rem; line-height:1.15; margin:0 0 14px; max-width:34ch;}
+  header.hero p.lede{font-size:1.02rem; color:var(--ink-soft); max-width:70ch; margin:0 0 22px;}
+  .hero-meta{display:flex; flex-wrap:wrap; gap:26px; margin-top:20px;}
+  .hero-meta div{font-size:0.85rem;} .hero-meta span{display:block; color:var(--ink-soft); font-size:0.74rem; margin-bottom:2px;}
+
+  .changelog{background:var(--fix-bg); border:1px solid #D9BB98; border-radius:var(--radius); padding:24px 26px; margin-bottom:48px;}
+  .changelog h2{font-size:1.15rem; margin:0 0 4px; color:var(--fix);}
+  .changelog > p{font-size:0.88rem; color:var(--ink-soft); margin:0 0 16px;}
+  .changelog ol{margin:0; padding-left:22px;}
+  .changelog li{font-size:0.9rem; margin-bottom:10px;}
+  .changelog li b{color:var(--fix);}
+
+  section{margin-bottom:52px; scroll-margin-top:20px;}
+  section h2{font-size:1.4rem; display:flex; align-items:baseline; gap:12px; margin-bottom:4px;}
+  section h2 .num{font-family:'IBM Plex Mono',monospace; font-size:0.9rem; color:var(--gold);}
+  section > p.sub{font-size:0.88rem; color:var(--ink-soft); margin-top:0; margin-bottom:20px;}
+  section h3{font-size:1.08rem; margin:26px 0 10px;}
+
+  .fixed{border-left:3px solid var(--fix); background:var(--fix-bg); padding:12px 16px; margin:14px 0; font-size:0.9rem; border-radius:0 var(--radius) var(--radius) 0;}
+  .fixed b{color:var(--fix);}
+  .fixed .tag{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:#fff; background:var(--fix); padding:1px 7px; border-radius:20px; margin-right:8px; vertical-align:1px;}
+
+  table{width:100%; border-collapse:collapse; font-size:0.88rem; margin:12px 0;}
+  th{text-align:left; font-weight:600; font-size:0.76rem; color:var(--ink-soft); padding:9px 11px; border-bottom:1px solid var(--ink);}
+  td{padding:11px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:hover td{background:var(--card);}
+
+  ul.plain, ol.plain{padding-left:22px; font-size:0.94rem;}
+  ul.plain li, ol.plain li{margin-bottom:7px;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:700px){.grid-2{grid-template-columns:1fr;}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;}
+  .card h4{margin:0 0 8px; font-size:0.98rem;}
+  .card p{margin:0; font-size:0.88rem; color:var(--ink-soft);}
+
+  .timeline{border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0;}
+  .tl-row{display:grid; grid-template-columns:170px 1fr; align-items:center; gap:14px; margin-bottom:10px;}
+  .tl-label{font-size:0.83rem;}
+  .tl-track{position:relative; height:22px; background:var(--paper-deep); border-radius:2px;}
+  .tl-bar{position:absolute; top:0; bottom:0; background:var(--ledger); border-radius:2px; display:flex; align-items:center; padding-left:8px;}
+  .tl-bar span{font-size:0.66rem; font-family:'IBM Plex Mono',monospace; color:#EFEAE0; white-space:nowrap;}
+
+  .sev-high{color:var(--danger); font-weight:600; font-family:'IBM Plex Mono',monospace; font-size:0.74rem;}
+  .sev-med{color:var(--gold); font-weight:600; font-family:'IBM Plex Mono',monospace; font-size:0.74rem;}
+  .sev-low{color:var(--ledger-deep); font-weight:600; font-family:'IBM Plex Mono',monospace; font-size:0.74rem;}
+
+  .checklist{list-style:none; margin:0; padding:0;}
+  .checklist li{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:0.9rem;}
+  .checklist li::before{content:""; width:14px; height:14px; margin-top:3px; flex-shrink:0; border:1.5px solid var(--ink-soft); border-radius:3px;}
+
+  footer{border-top:1px solid var(--line); padding-top:22px; font-size:0.8rem; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="brand">Personal Knowledge Assistant</div>
+    <div class="brand-sub">Proposal v2 — đã fix toàn bộ gap review</div>
+    <div class="grp">Bắt đầu</div>
+    <ol>
+      <li><a href="#changelog"><span class="n">—</span>Đổi mới so với bản gốc</a></li>
+      <li><a href="#s1"><span class="n">01</span>Tổng quan đề tài</a></li>
+      <li><a href="#s2"><span class="n">02</span>Bối cảnh & vấn đề</a></li>
+      <li><a href="#s3"><span class="n">03</span>Mục tiêu & kết quả</a></li>
+      <li><a href="#s4"><span class="n">04</span>RQ & giả thuyết</a></li>
+      <li><a href="#s5"><span class="n">05</span>Phạm vi & tiêu chí</a></li>
+    </ol>
+    <div class="grp">Thiết kế</div>
+    <ol>
+      <li><a href="#s6"><span class="n">06</span>Cơ sở lý thuyết</a></li>
+      <li><a href="#s7"><span class="n">07</span>Kiến trúc hệ thống</a></li>
+      <li><a href="#s8"><span class="n">08</span>Dữ liệu & benchmark</a></li>
+      <li><a href="#s9"><span class="n">09</span>Thiết kế thực nghiệm</a></li>
+      <li><a href="#s10"><span class="n">10</span>Phân tích module AI</a></li>
+      <li><a href="#s11"><span class="n">11</span>Tech stack</a></li>
+    </ol>
+    <div class="grp">Triển khai</div>
+    <ol>
+      <li><a href="#s12"><span class="n">12</span>Timeline 12 tuần (chốt)</a></li>
+      <li><a href="#s13"><span class="n">13</span>Phân công nhóm</a></li>
+      <li><a href="#s14"><span class="n">14</span>Rủi ro & fallback</a></li>
+      <li><a href="#s15"><span class="n">15</span>Bảo mật & quyền riêng tư</a></li>
+      <li><a href="#s16"><span class="n">16</span>Tiêu chí nghiệm thu</a></li>
+      <li><a href="#s17"><span class="n">17</span>Cấu trúc báo cáo</a></li>
+      <li><a href="#s18"><span class="n">18</span>Ngân sách & giới hạn API</a></li>
+    </ol>
+    <div class="grp">Kết</div>
+    <ol>
+      <li><a href="#s19"><span class="n">19</span>Kết luận</a></li>
+      <li><a href="#s20"><span class="n">20</span>Tài liệu tham khảo</a></li>
+      <li><a href="#appA"><span class="n">A</span>Phụ lục A — Template</a></li>
+      <li><a href="#appB"><span class="n">B</span>Phụ lục B — Checklist</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">PROJECT PROPOSAL v2 — AI RESEARCH & ENGINEERING</div>
+      <h1>Personal Knowledge Assistant — Retrieval-Augmented Generation + LLM</h1>
+      <p class="lede">Bản hoàn chỉnh, hợp nhất Master Plan + Proposal gốc, đã vá toàn bộ 6 lỗ hổng phát hiện qua review: tokenizer tiếng Việt cho BM25, cỡ mẫu evaluation, định nghĩa vận hành cho citation correctness/faithfulness, độ đồng thuận gán nhãn, ngân sách API cụ thể, và context assembly cho multi-document. Timeline 2 bản cũ (Master Plan vs Proposal) cũng đã được hợp nhất thành một bản duy nhất.</p>
+      <div class="hero-meta">
+        <div><span>Thời lượng</span><strong>12 tuần · nhóm 5 người</strong></div>
+        <div><span>Mô hình phát triển</span><strong>Research-driven MVP evaluated system</strong></div>
+        <div><span>Baseline ladder</span><strong>S0 → S4 (+ S5 extension)</strong></div>
+        <div><span>Trạng thái</span><strong>v2 — đã fix review gaps</strong></div>
+      </div>
+    </header>
+
+    <section class="changelog" id="changelog">
+      <h2>Đổi mới so với bản gốc</h2>
+      <p>6 thay đổi kỹ thuật/phương pháp so với Proposal v1, cộng với việc hợp nhất timeline. Các thay đổi được đánh dấu <span class="fixed" style="display:inline; padding:2px 8px;"><span class="tag">FIX</span></span> tại đúng vị trí trong các mục tương ứng bên dưới.</p>
+      <ol>
+        <li><b>Tokenizer tiếng Việt cho BM25</b> — thêm bước word segmentation (underthesea/pyvi/VnCoreNLP) trước khi build sparse index, tránh tách sai từ ghép làm hỏng TF-IDF. Xem mục 10.4 và 11.</li>
+        <li><b>Cỡ mẫu evaluation set</b> — tăng mục tiêu lên 280-320 câu (tối thiểu 45/loại query), kèm disclaimer thống kê nếu không đạt. Xem mục 8.3.</li>
+        <li><b>Định nghĩa vận hành cho Citation Correctness & Faithfulness</b> — cụ thể hóa bằng NLI entailment check + rubric LLM-as-judge có calibration. Xem mục 8.5 (mới) và 11.</li>
+        <li><b>Độ đồng thuận gán nhãn (inter-annotator agreement)</b> — thêm Cohen's Kappa/tỷ lệ đồng thuận và quy trình giải quyết bất đồng. Xem mục 8.4.</li>
+        <li><b>Ngân sách API cụ thể</b> — thêm mục 18 mới: giới hạn chi phí theo tuần, ước tính token, ngưỡng cảnh báo. </li>
+        <li><b>Context assembly cho multi-document</b> — bổ sung quy tắc gộp evidence từ nhiều nguồn khác nhau khi build context. Xem mục 7.3 bước 09.</li>
+        <li><b>Timeline hợp nhất</b> — chỉ còn 1 bản 12 tuần duy nhất (mục 12), không còn khác biệt giữa Master Plan và Proposal.</li>
+      </ol>
+    </section>
+
+    <!-- 1 -->
+    <section id="s1">
+      <h2><span class="num">01</span>Tổng quan đề tài</h2>
+      <h3>1.1 Tên đề tài</h3>
+      <p><b>English:</b> Design and Evaluation of a Retrieval-Augmented Personal Knowledge Assistant Using Large Language Models<br>
+      <b>Vietnamese:</b> Xây dựng và đánh giá trợ lý tri thức cá nhân dựa trên Retrieval-Augmented Generation và Large Language Models</p>
+      <h3>1.2 Sản phẩm cuối</h3>
+      <ul class="plain">
+        <li>Ứng dụng cho phép upload tài liệu, lập chỉ mục, hỏi đáp bằng text; trả lời kèm citation và thông tin trang/tài liệu khi có.</li>
+        <li>Pipeline RAG có thể tái hiện và benchmark.</li>
+        <li>Bộ evaluation set và báo cáo thực nghiệm so sánh các cấu hình retrieval/generation, kèm khoảng tin cậy thống kê.</li>
+        <li>Kết luận kỹ thuật dựa trên dữ liệu, không khẳng định trước kỹ thuật nào tốt nhất.</li>
+      </ul>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2">
+      <h2><span class="num">02</span>Bối cảnh và vấn đề cần giải quyết</h2>
+      <p>LLM hiện có khả năng hiểu và sinh ngôn ngữ tự nhiên mạnh, nhưng không mặc định biết kho tri thức cá nhân của người dùng. Trong use case học tập, thông tin cần trả lời thường nằm trong slide, giáo trình, ghi chú và tài liệu nội bộ; người dùng cần câu trả lời bám tài liệu thay vì câu trả lời chung chung.</p>
+      <p><b>Problem Statement:</b> Thiết kế một trợ lý tri thức cá nhân có khả năng truy xuất đúng bằng chứng từ kho tài liệu của người dùng và sử dụng bằng chứng đó để sinh câu trả lời có căn cứ, có nguồn tham chiếu và có cơ chế từ chối khi không đủ bằng chứng.</p>
+      <h3>2.1 Bài toán AI cốt lõi</h3>
+      <ul class="plain">
+        <li><b>Retrieval:</b> câu hỏi cần được ánh xạ tới các chunk có liên quan nhất.</li>
+        <li><b>Ranking:</b> xác định bằng chứng phù hợp nhất trong các candidate retrieved.</li>
+        <li><b>Grounded Generation:</b> LLM phải sử dụng context thay vì tự "điền" thông tin ngoài nguồn.</li>
+        <li><b>Evidence attribution:</b> câu trả lời phải truy ngược được về document/chunk/page.</li>
+        <li><b>Abstention:</b> nếu context không đủ, hệ thống phải nói rõ không tìm thấy thay vì đoán.</li>
+      </ul>
+      <h3>2.2 Vì sao đề tài có giá trị nghiên cứu</h3>
+      <ul class="plain">
+        <li>Tách và đo được hai lớp AI: retrieval quality và generation quality.</li>
+        <li>Cho phép controlled experiments giữa Dense, Sparse/BM25, Hybrid và Reranking.</li>
+        <li>Phân tích trade-off giữa quality, latency, complexity và cost.</li>
+        <li>Có failure cases thực tế để làm error analysis, không chỉ trình diễn chatbot.</li>
+      </ul>
+    </section>
+
+    <!-- 3 -->
+    <section id="s3">
+      <h2><span class="num">03</span>Mục tiêu và kết quả đầu ra</h2>
+      <table>
+        <thead><tr><th>ID</th><th>Mục tiêu</th><th>Kết quả mong đợi</th></tr></thead>
+        <tbody>
+          <tr><td>O1</td><td>Ingestion pipeline</td><td>Đọc và chuẩn hóa PDF/DOCX/PPTX/ảnh scan thành đơn vị tri thức có metadata</td></tr>
+          <tr><td>O2</td><td>Retrieval baseline</td><td>Dense Retrieval và BM25 (có word segmentation tiếng Việt) để so sánh</td></tr>
+          <tr><td>O3</td><td>Hybrid Retrieval</td><td>Kết hợp dense + sparse bằng fusion có kiểm soát</td></tr>
+          <tr><td>O4</td><td>Reranker</td><td>Đánh giá rerank candidate có cải thiện relevance hay không</td></tr>
+          <tr><td>O5</td><td>LLM Integration</td><td>Sinh câu trả lời theo context, có citation và abstention</td></tr>
+          <tr><td>O6</td><td>Benchmark</td><td>Evaluation set ≥280 câu, có ground truth + gold evidence + agreement score</td></tr>
+          <tr><td>O7</td><td>Đánh giá hệ thống</td><td>Đo retrieval, generation, system performance kèm khoảng tin cậy</td></tr>
+          <tr><td>O8</td><td>Phân tích lỗi</td><td>Xác định failure mode và nguyên nhân</td></tr>
+        </tbody>
+      </table>
+      <h3>3.1 Deliverables</h3>
+      <ul class="plain">
+        <li>Source code và cấu trúc repository có thể tái lập (kèm <code>requirements.txt</code>/lockfile, seed cố định)</li>
+        <li>Bộ corpus + metadata + evaluation set + agreement report</li>
+        <li>MVP web application</li>
+        <li>Benchmark script và bảng metrics kèm confidence interval</li>
+        <li>Báo cáo kỹ thuật/đề tài, slide, demo</li>
+      </ul>
+    </section>
+
+    <!-- 4 -->
+    <section id="s4">
+      <h2><span class="num">04</span>Câu hỏi nghiên cứu và giả thuyết</h2>
+      <table>
+        <thead><tr><th>RQ</th><th>Câu hỏi</th><th>Biến/đối chiếu chính</th></tr></thead>
+        <tbody>
+          <tr><td>RQ1</td><td>RAG có cải thiện answer quality và faithfulness so với LLM-only không?</td><td>LLM-only vs Dense RAG</td></tr>
+          <tr><td>RQ2</td><td>Chunk size ảnh hưởng thế nào đến retrieval và answer quality?</td><td>256/512/1024 tokens</td></tr>
+          <tr><td>RQ3</td><td>Dense, BM25 và Hybrid khác nhau thế nào trên các loại query?</td><td>Retriever type × query type</td></tr>
+          <tr><td>RQ4</td><td>Reranker có cải thiện relevance/faithfulness đủ lớn để bù latency không?</td><td>Hybrid vs Hybrid+Reranker</td></tr>
+          <tr><td>RQ5</td><td>Các failure mode chính nằm ở module nào?</td><td>Error taxonomy / ablation</td></tr>
+        </tbody>
+      </table>
+      <h3>4.1 Giả thuyết</h3>
+      <ul class="plain">
+        <li><b>H1:</b> RAG cải thiện groundedness và khả năng trả lời có bằng chứng so với LLM-only.</li>
+        <li><b>H2:</b> Chunk quá nhỏ mất ngữ cảnh; quá lớn giảm độ chính xác retrieval; tồn tại vùng chunk size hợp lý.</li>
+        <li><b>H3:</b> Hybrid retrieval bao phủ tốt hơn khi query kết hợp semantic intent với keyword/exact-match.</li>
+        <li><b>H4:</b> Reranker tăng relevance của top-k context nhưng làm tăng latency và cost.</li>
+        <li><b>H5:</b> Chất lượng cuối cùng bị chi phối chủ yếu bởi retrieval/context quality; prompt tốt không bù được evidence kém.</li>
+      </ul>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5">
+      <h2><span class="num">05</span>Phạm vi, đối tượng và tiêu chí thành công</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h4>In-scope</h4>
+          <p>Tài liệu học tập của nhóm · PDF/DOCX/PPTX/ảnh scan (MVP/extension) · Text-based QA · Dense/BM25/Hybrid retrieval · Optional reranking · LLM generation + citation · Evaluation có ground truth + error analysis · Web UI upload + chat</p>
+        </div>
+        <div class="card">
+          <h4>Out-of-scope (giai đoạn lõi)</h4>
+          <p>Agentic RAG phức tạp · Graph RAG · Fine-tuning LLM thay RAG · Multimodal reasoning end-to-end · Long-term memory phức tạp · Production-scale distributed deployment</p>
+        </div>
+      </div>
+      <h3>5.1 Tiêu chí thành công cấp dự án</h3>
+      <ul class="plain">
+        <li>Pipeline ingest → index → retrieve → rerank(optional) → generate → cite chạy ổn định trên corpus thực tế.</li>
+        <li>Tái hiện benchmark giữa ít nhất 4 cấu hình retrieval/generation.</li>
+        <li>Có báo cáo metrics định lượng kèm khoảng tin cậy, và error analysis định tính.</li>
+        <li>Có demo end-to-end thao tác được.</li>
+      </ul>
+    </section>
+
+    <!-- 6 -->
+    <section id="s6">
+      <h2><span class="num">06</span>Cơ sở lý thuyết và khái niệm cốt lõi</h2>
+      <table>
+        <thead><tr><th>Khái niệm</th><th>Vai trò</th></tr></thead>
+        <tbody>
+          <tr><td>LLM</td><td>Đọc question + context, sinh câu trả lời</td></tr>
+          <tr><td>Embedding</td><td>Biểu diễn text thành vector cho semantic similarity</td></tr>
+          <tr><td>Dense Retrieval</td><td>Tìm chunk gần query trong không gian embedding</td></tr>
+          <tr><td>BM25</td><td>Sparse lexical retrieval, mạnh với keyword/exact match — <b>yêu cầu word segmentation đúng cho tiếng Việt</b></td></tr>
+          <tr><td>Hybrid Retrieval</td><td>Kết hợp dense và sparse retrieval</td></tr>
+          <tr><td>Reranking</td><td>Xếp hạng lại candidate bằng model nhìn trực tiếp cặp query-document</td></tr>
+          <tr><td>RAG</td><td>Pipeline retrieval + augmentation + generation</td></tr>
+          <tr><td>Grounding</td><td>Giới hạn câu trả lời vào bằng chứng được cung cấp</td></tr>
+          <tr><td>Citation</td><td>Liên kết câu trả lời với document/chunk/page</td></tr>
+          <tr><td>Faithfulness</td><td>Mức độ câu trả lời được hỗ trợ bởi evidence — đo bằng NLI entailment (mục 8.5)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7">
+      <h2><span class="num">07</span>Kiến trúc hệ thống đề xuất</h2>
+      <h3>7.1 Kiến trúc tổng quát</h3>
+      <p><b>Offline:</b> Upload → File type detection → Parsing/OCR → Cleaning → Chunking → Metadata → Embedding + <b>BM25 indexing (sau word segmentation)</b> → Vector/Sparse store.</p>
+      <p><b>Online:</b> User query → Optional OCR/query rewrite → Dense retrieval + BM25 → Fusion → Optional reranking → Context assembly → LLM → Citation + Answer + Abstention.</p>
+      <p><b>Evaluation:</b> Logged query/retrieval/context/answer → benchmark metrics → error analysis → iteration.</p>
+
+      <h3>7.2 Data model tối thiểu</h3>
+      <table>
+        <thead><tr><th>Entity</th><th>Field chính</th><th>Mục đích</th></tr></thead>
+        <tbody>
+          <tr><td>Document</td><td>doc_id, filename, type, source</td><td>Nhận diện tài liệu</td></tr>
+          <tr><td>Chunk</td><td>chunk_id, doc_id, text, page, section</td><td>Đơn vị retrieval</td></tr>
+          <tr><td>Embedding</td><td>chunk_id, vector</td><td>Dense search</td></tr>
+          <tr><td>Sparse index</td><td>chunk_id, segmented tokens</td><td>BM25</td></tr>
+          <tr><td>QA item</td><td>question, gold answer, gold chunk(s), query_type</td><td>Evaluation</td></tr>
+          <tr><td>Run log</td><td>config, retrieved chunks, answer, latency, cost</td><td>Reproducibility & analysis</td></tr>
+        </tbody>
+      </table>
+
+      <h3>7.3 Workflow chi tiết</h3>
+      <table>
+        <thead><tr><th>Bước</th><th>Module</th><th>Yêu cầu</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td>Ingestion</td><td>Nhận file; kiểm tra loại/size; tạo doc_id</td></tr>
+          <tr><td>02</td><td>Parsing</td><td>Extract text + page/section; OCR nếu scan</td></tr>
+          <tr><td>03</td><td>Cleaning</td><td>Loại noise nhưng không xóa thông tin mang ý nghĩa</td></tr>
+          <tr><td>04</td><td>Chunking</td><td>Tạo chunk với metadata; giữ quan hệ với nguồn gốc</td></tr>
+          <tr><td>05</td><td>Indexing</td><td>Dense embedding và BM25 index (sau word segmentation) chạy song song</td></tr>
+          <tr><td>06</td><td>Retrieval</td><td>Top-K dense + Top-K BM25</td></tr>
+          <tr><td>07</td><td>Fusion</td><td>Merge candidate (RRF)</td></tr>
+          <tr><td>08</td><td>Reranking</td><td>Cross-encoder rerank khi bật cấu hình</td></tr>
+          <tr><td>09</td><td>Context</td><td>Chọn top context, giới hạn token, giữ citation metadata.
+            <div class="fixed"><span class="tag">FIX</span><b>Multi-document context assembly:</b> khi context chứa chunk từ ≥2 document khác nhau, (a) group theo doc_id trước khi ghép vào prompt, (b) chèn header phân đoạn dạng <code>[Nguồn: {filename}, trang {page}]</code> trước mỗi group để LLM không lẫn nguồn giữa các claim, (c) nếu tổng token vượt budget, cắt theo nguyên tắc giữ đều số chunk mỗi document thay vì ưu tiên toàn bộ 1 document.</div>
+          </td></tr>
+          <tr><td>10</td><td>Generation</td><td>LLM sinh answer theo instruction grounded</td></tr>
+          <tr><td>11</td><td>Validation</td><td>Kiểm tra context relevance/citation/abstention</td></tr>
+          <tr><td>12</td><td>Response</td><td>Trả answer + references + source snippets</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 8 -->
+    <section id="s8">
+      <h2><span class="num">08</span>Thiết kế dữ liệu và benchmark</h2>
+      <h3>8.1 Corpus chính</h3>
+      <ul class="plain">
+        <li>Nguồn ưu tiên: slide, lecture notes, giáo trình, ghi chú và tài liệu nhóm.</li>
+        <li>Phản ánh dữ liệu thật, bao gồm layout khác nhau và một phần "dirty data".</li>
+        <li>Mỗi tài liệu giữ metadata đủ để citation về file/trang/section.</li>
+      </ul>
+      <h3>8.2 Public QA / benchmark bổ sung</h3>
+      <p>Có thể dùng ViQuAD/UIT-ViQuAD sau khi kiểm tra quyền truy cập và license. Public QA hỗ trợ benchmark khách quan; corpus nội bộ vẫn là trọng tâm.</p>
+
+      <h3>8.3 Evaluation set nội bộ</h3>
+      <div class="fixed"><span class="tag">FIX</span><b>Cỡ mẫu:</b> mục tiêu cũ (100-200 câu) quá mỏng để so sánh 5 cấu hình trên 6 loại query (chỉ ~15-30 câu/loại). Mục tiêu mới: <b>280-320 câu</b>, tối thiểu <b>45 câu/loại query</b>. Nếu nguồn lực không đủ để đạt mốc này, báo cáo phải ghi rõ disclaimer "kết quả exploratory, statistical power thấp" thay vì kết luận chắc chắn "X thắng Y".</div>
+      <table>
+        <thead><tr><th>Loại query</th><th>Mục tiêu đánh giá</th><th>Ví dụ hành vi</th><th>Số câu tối thiểu</th></tr></thead>
+        <tbody>
+          <tr><td>Direct lookup</td><td>Tìm thông tin rõ ràng</td><td>Tên khái niệm, định nghĩa, công thức</td><td>45</td></tr>
+          <tr><td>Semantic</td><td>Hiểu paraphrase</td><td>Hỏi bằng cách diễn đạt khác tài liệu</td><td>45</td></tr>
+          <tr><td>Keyword-heavy</td><td>Exact term</td><td>Tên hàm, thuật ngữ, ký hiệu</td><td>45</td></tr>
+          <tr><td>Multi-document</td><td>Tổng hợp</td><td>Cần 2+ nguồn/chunk</td><td>45</td></tr>
+          <tr><td>Conversational</td><td>Ngữ cảnh hội thoại</td><td>Follow-up question</td><td>45</td></tr>
+          <tr><td>No-answer</td><td>Abstention</td><td>Không có thông tin trong corpus</td><td>45</td></tr>
+        </tbody>
+      </table>
+
+      <h3>8.4 Nguyên tắc tạo ground truth</h3>
+      <ul class="plain">
+        <li>Mỗi câu hỏi có gold answer ngắn gọn và gold evidence chunk/page khi có thể.</li>
+        <li>Không dùng cùng một người tạo toàn bộ QA; có cross-review giữa thành viên.</li>
+        <li>No-answer questions được cố ý xây dựng và đánh giá riêng.</li>
+      </ul>
+      <div class="fixed"><span class="tag">FIX</span><b>Độ đồng thuận gán nhãn:</b> với mỗi 20% mẫu được cross-review (≈56-64 câu), tính <b>Cohen's Kappa</b> giữa người tạo gốc và người review cho 2 quyết định: (a) gold evidence chunk có đúng không, (b) câu hỏi có thuộc đúng loại query đã gán không. Ngưỡng chấp nhận: κ ≥ 0.6 (agreement khá). Nếu κ &lt; 0.6, tổ chức buổi thảo luận thống nhất tiêu chí và làm lại review trên mẫu mới. Bất đồng còn lại sau thảo luận: người thứ 3 (role E — Research/PM/QA) quyết định cuối cùng.</div>
+
+      <h3>8.5 Định nghĩa vận hành cho Faithfulness & Citation Correctness</h3>
+      <div class="fixed"><span class="tag">FIX</span>Mục này là bổ sung mới — bản gốc chỉ định nghĩa khái niệm, không nói cách đo.</div>
+      <ul class="plain">
+        <li><b>Faithfulness:</b> tách câu trả lời thành các claim đơn (câu/cụm câu mang 1 thông tin). Với mỗi claim, dùng NLI model (ví dụ multilingual NLI hoặc LLM-as-judge có rubric cố định) để phân loại quan hệ với context đã retrieve: <i>entailment</i> (được support), <i>contradiction</i>, <i>neutral</i> (không đủ căn cứ). Faithfulness score = tỷ lệ claim ở nhóm entailment.</li>
+        <li><b>Citation Correctness:</b> với mỗi citation trong câu trả lời (trỏ tới document/chunk/page cụ thể), kiểm tra claim tương ứng có nằm trong đúng chunk được trỏ tới không (so khớp evidence span đã gán nhãn ở gold set, hoặc entailment check riêng cho chunk đó). Citation Correctness = tỷ lệ citation trỏ đúng nguồn support claim.</li>
+        <li><b>Calibration LLM-as-judge:</b> trước khi dùng LLM-as-judge làm proxy cho 2 metric trên ở quy mô lớn, chạy trên mẫu 40-50 câu có nhãn người, đo Cohen's Kappa giữa LLM-judge và human — chỉ dùng LLM-judge cho phần còn lại nếu κ ≥ 0.6, ngược lại chuyển sang human evaluation toàn phần hoặc mở rộng mẫu người chấm.</li>
+      </ul>
+
+      <h3>8.6 Nguyên tắc data</h3>
+      <ul class="plain">
+        <li>Không trộn train/test knowledge và evaluation annotations gây leakage.</li>
+        <li>Nếu tự tạo câu hỏi từ một tài liệu, relevant chunk phải được đánh dấu trước khi chạy hệ thống.</li>
+        <li>Tách rõ corpus indexing và test set.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section id="s9">
+      <h2><span class="num">09</span>Phương pháp nghiên cứu và thiết kế thực nghiệm</h2>
+      <h3>9.1 Baseline ladder</h3>
+      <table>
+        <thead><tr><th>System</th><th>Mô tả</th><th>Mục đích</th></tr></thead>
+        <tbody>
+          <tr><td>S0</td><td>LLM-only</td><td>Baseline generation không retrieval</td></tr>
+          <tr><td>S1</td><td>Dense RAG</td><td>Embedding + vector retrieval + LLM</td></tr>
+          <tr><td>S2</td><td>BM25 RAG</td><td>Lexical retrieval (có word segmentation) + LLM</td></tr>
+          <tr><td>S3</td><td>Hybrid RAG</td><td>Dense + BM25 + fusion + LLM</td></tr>
+          <tr><td>S4</td><td>Hybrid + Reranker</td><td>S3 + cross-encoder reranking</td></tr>
+        </tbody>
+      </table>
+      <h3>9.2 Controlled experiments</h3>
+      <table>
+        <thead><tr><th>Exp</th><th>So sánh</th><th>Mục tiêu</th></tr></thead>
+        <tbody>
+          <tr><td>E1</td><td>S0 vs S1</td><td>Đo tác động tổng của RAG</td></tr>
+          <tr><td>E2</td><td>Chunk size (256/512/1024)</td><td>Đo ảnh hưởng segmentation</td></tr>
+          <tr><td>E3</td><td>S1 vs S2 vs S3</td><td>Đo retrieval strategy</td></tr>
+          <tr><td>E4</td><td>S3 vs S4</td><td>Đo đóng góp reranker và latency</td></tr>
+          <tr><td>E5</td><td>Ablation</td><td>Bỏ từng component để xác định đóng góp thực tế</td></tr>
+          <tr><td>E6</td><td>Query-type analysis</td><td>Cấu hình nào mạnh/yếu ở từng loại query</td></tr>
+        </tbody>
+      </table>
+      <h3>9.3 Quy tắc kiểm soát thí nghiệm</h3>
+      <ul class="plain">
+        <li>Giữ LLM, prompt template và max context cố định khi so retrieval, trừ khi đó là biến nghiên cứu.</li>
+        <li>Giữ cùng evaluation set cho tất cả cấu hình; ghi lại seed/config/model/version.</li>
+        <li>Mỗi thay đổi phải có hypothesis và metric tương ứng.</li>
+      </ul>
+      <div class="fixed"><span class="tag">FIX</span><b>Kiểm định ý nghĩa thống kê:</b> với mỗi cặp so sánh (E1, E3, E4), dùng <b>bootstrap resampling</b> (1000 lần resample trên evaluation set) để tính khoảng tin cậy 95% cho chênh lệch metric giữa 2 hệ thống, hoặc <b>McNemar's test</b> cho so sánh nhị phân (đúng/sai) theo từng câu hỏi (paired). Không kết luận "hệ thống A tốt hơn B" nếu khoảng tin cậy chênh lệch chứa 0 hoặc p-value &gt; 0.05 — báo cáo là "chưa có khác biệt có ý nghĩa thống kê" trong trường hợp này.</div>
+    </section>
+
+    <!-- 10 -->
+    <section id="s10">
+      <h2><span class="num">10</span>Phân tích từng module AI</h2>
+      <h3>10.1 Document Ingestion</h3>
+      <p>Bản chất: biến file không cấu trúc thành text có cấu trúc và provenance. Failure mode: mất cột, sai thứ tự, mất tiêu đề, OCR sai ký tự.</p>
+      <h3>10.2 Chunking</h3>
+      <p>Bản chất: quyết định đơn vị mà retriever có thể lấy lại. Failure mode: chunk quá nhỏ thiếu ngữ cảnh; quá lớn chứa noise.</p>
+      <h3>10.3 Embedding</h3>
+      <p>Bản chất: ánh xạ text vào không gian vector để đo semantic similarity. Failure mode: paraphrase/keyword/domain mismatch.</p>
+      <h3>10.4 BM25</h3>
+      <p>Bản chất: lexical matching dựa trên term frequency, inverse document frequency và document length.</p>
+      <div class="fixed"><span class="tag">FIX</span><b>Word segmentation bắt buộc trước khi build BM25 index:</b> tiếng Việt không phân tách từ bằng khoảng trắng đơn giản (từ ghép như "công ty", "trí tuệ nhân tạo" là 1 đơn vị ngữ nghĩa). Không segment trước sẽ làm tokenizer tách sai, phá vỡ TF-IDF và khiến toàn bộ baseline BM25/Hybrid không đáng tin. Bắt buộc dùng một trong: <code>underthesea</code> (dễ tích hợp, đủ nhanh cho MVP), <code>pyvi</code> (nhẹ, nhanh), hoặc <code>VnCoreNLP</code> (chính xác cao hơn nhưng cần JVM). Áp dụng segmentation đồng nhất cho cả corpus khi indexing và query khi retrieval — lệch tokenizer giữa 2 phía là lỗi ngầm rất khó phát hiện.</div>
+      <h3>10.5 Hybrid Retrieval</h3>
+      <p>Bản chất: tận dụng hai tín hiệu khác nhau. Failure mode: một retriever thống trị hoặc merge candidate không hợp lý.</p>
+      <h3>10.6 Reranking</h3>
+      <p>Bản chất: dùng model mạnh hơn để đánh giá relevance trên candidate nhỏ. Failure mode: candidate recall thấp thì reranker không thể "tìm" chunk chưa retrieve.</p>
+      <h3>10.7 RAG Prompting</h3>
+      <p>Bản chất: chuyển evidence thành context có cấu trúc cho LLM. Failure mode: prompt overlong, contradictory context, unsupported generation.</p>
+      <h3>10.8 Evaluation</h3>
+      <p>Bản chất: đo đúng module nào đang tạo giá trị hoặc gây lỗi. Failure mode: chỉ dùng một metric tổng hợp và không biết lỗi nằm ở đâu.</p>
+    </section>
+
+    <!-- 11 -->
+    <section id="s11">
+      <h2><span class="num">11</span>Tech stack và quyết định kỹ thuật</h2>
+      <table>
+        <thead><tr><th>Layer</th><th>Ưu tiên MVP</th><th>Phương án nâng cấp</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td>Language</td><td>Python</td><td>Python</td><td>Hệ sinh thái NLP/ML mạnh</td></tr>
+          <tr><td>Parsing</td><td>PyMuPDF, python-docx, python-pptx</td><td>Layout-aware parser/OCR</td><td>Giữ provenance</td></tr>
+          <tr><td>Tokenization (BM25)</td><td><code>underthesea</code> hoặc <code>pyvi</code></td><td><code>VnCoreNLP</code> nếu cần độ chính xác cao hơn</td><td class="fixed" style="display:table-cell; border:none; padding:4px 0;"><span class="tag">FIX</span>Bắt buộc — xem mục 10.4</td></tr>
+          <tr><td>Embedding</td><td>Sentence-Transformers multilingual/Vietnamese (bge-m3)</td><td>Benchmark theo domain</td><td>Chọn bằng retrieval benchmark, không chọn vì phổ biến</td></tr>
+          <tr><td>Vector search</td><td>FAISS</td><td>Qdrant cho service</td><td>MVP dễ tái lập trước</td></tr>
+          <tr><td>Sparse</td><td>BM25 (rank_bm25 hoặc Elasticsearch)</td><td>Tối ưu analyzer</td><td>Input đã qua word segmentation</td></tr>
+          <tr><td>Fusion</td><td>RRF</td><td>Learned fusion</td><td>Đơn giản, dễ giải thích</td></tr>
+          <tr><td>Reranker</td><td>Cross-Encoder (bge-reranker)</td><td>Model chuyên biệt</td><td>Chỉ thêm khi có evidence</td></tr>
+          <tr><td>LLM</td><td>API model phù hợp budget</td><td>Self-host nếu cần</td><td>Quality/cost/latency</td></tr>
+          <tr><td>Faithfulness/Citation eval</td><td>NLI model multilingual (mDeBERTa-NLI) + LLM-as-judge có calibration</td><td>Custom fine-tuned NLI nếu cần</td><td class="fixed" style="display:table-cell; border:none; padding:4px 0;"><span class="tag">FIX</span>Xem mục 8.5</td></tr>
+          <tr><td>Backend</td><td>FastAPI</td><td>Production service</td><td>Tách API khỏi UI</td></tr>
+          <tr><td>Frontend</td><td>Streamlit</td><td>Next.js</td><td>MVP nhanh trước</td></tr>
+          <tr><td>Evaluation</td><td>Python + RAGAS + bootstrap CI script</td><td>Custom evaluator</td><td>Giữ raw outputs để audit</td></tr>
+          <tr><td>Versioning</td><td>Git + config files + experiment log</td><td>—</td><td>Seed/model/version rõ ràng</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 12 -->
+    <section id="s12">
+      <h2><span class="num">12</span>Kế hoạch triển khai 12 tuần — bản chốt duy nhất</h2>
+      <p class="sub">Hợp nhất từ 2 bản timeline lệch nhau (Master Plan vs Proposal v1) thành 1 bản duy nhất — đây là nguồn sự thật chính thức cho toàn nhóm.</p>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-label">1 · Scoping</div><div class="tl-track"><div class="tl-bar" style="left:0%; width:9%;"><span>Đề cương + data plan</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">2 · Data & QA seed</div><div class="tl-track"><div class="tl-bar" style="left:8%; width:9%; background:#4A7A68;"><span>Corpus v0 + 30-50 QA</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">3 · Ingestion</div><div class="tl-track"><div class="tl-bar" style="left:16%; width:9%; background:#4A7A68;"><span>Parsing + metadata</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">4 · Chunking + Embedding</div><div class="tl-track"><div class="tl-bar" style="left:24%; width:9%; background:#4A7A68;"><span>Chunk table + dense index</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">5 · Dense RAG (S1) + BM25 (S2)</div><div class="tl-track"><div class="tl-bar" style="left:32%; width:9%; background:#5C8B79;"><span>Segment tokenizer + 2 baseline</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">6 · Hybrid (S3) + generation MVP</div><div class="tl-track"><div class="tl-bar" style="left:40%; width:9%; background:#5C8B79;"><span>Basic RAG end-to-end</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">7 · Reranker (S4)</div><div class="tl-track"><div class="tl-bar" style="left:48%; width:9%; background:var(--gold);"><span>Latency benchmark</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">8 · Eval set hoàn chỉnh</div><div class="tl-track"><div class="tl-bar" style="left:56%; width:9%; background:var(--gold);"><span>280-320 câu + Kappa check</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">9 · Full experiments</div><div class="tl-track"><div class="tl-bar" style="left:64%; width:10%; background:var(--gold);"><span>Bootstrap CI + ablation</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">10 · Error analysis + tuning</div><div class="tl-track"><div class="tl-bar" style="left:74%; width:9%; background:var(--ledger-deep);"><span>Final config có bằng chứng</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">11 · UI + extension</div><div class="tl-track"><div class="tl-bar" style="left:82%; width:9%; background:var(--ledger-deep);"><span>Demo ổn định + OCR nếu kịp</span></div></div></div>
+        <div class="tl-row"><div class="tl-label">12 · Finalization</div><div class="tl-track"><div class="tl-bar" style="left:90%; width:10%; background:var(--ledger-deep);"><span>Report + slide + demo</span></div></div></div>
+      </div>
+      <p style="font-size:0.82rem; color:var(--ink-soft); margin-top:12px;">Gate cứng: chưa có metrics ở tuần 8 thì không polish UI ở tuần 11 (nguyên tắc từ Master Plan, giữ nguyên).</p>
+    </section>
+
+    <!-- 13 -->
+    <section id="s13">
+      <h2><span class="num">13</span>Phân công nhóm 5 người</h2>
+      <table>
+        <thead><tr><th>Role</th><th>Trách nhiệm chính</th><th>Đầu ra</th></tr></thead>
+        <tbody>
+          <tr><td>A — Data & Ingestion</td><td>Corpus, parsing, OCR, metadata, dataset QA, <b>word segmentation pipeline</b></td><td>Data pipeline + corpus documentation</td></tr>
+          <tr><td>B — Retrieval Engineer</td><td>Embedding, vector store, BM25 (segmented), hybrid, reranking</td><td>Retrieval modules + benchmark scripts</td></tr>
+          <tr><td>C — LLM/RAG Engineer</td><td>Prompting, context assembly (multi-doc), citation, abstention</td><td>Generation pipeline + prompt specs</td></tr>
+          <tr><td>D — Evaluation & Frontend</td><td>Metrics, RAGAS/NLI faithfulness, bootstrap CI, UI, dashboards</td><td>Evaluation package + demo UI</td></tr>
+          <tr><td>E — Research/PM/QA</td><td>RQ, experiment protocol, annotation agreement, report, integration testing</td><td>Master report + experiment log + QA</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.88rem; color:var(--ink-soft);">Mọi module có owner nhưng benchmark và release cuối phải được cross-review tối thiểu bởi một thành viên khác. Cả nhóm phải hiểu toàn pipeline, không tạo silo kiến thức.</p>
+    </section>
+
+    <!-- 14 -->
+    <section id="s14">
+      <h2><span class="num">14</span>Quản trị rủi ro và fallback</h2>
+      <table>
+        <thead><tr><th>Mức độ</th><th>Rủi ro</th><th>Dấu hiệu sớm</th><th>Fallback</th></tr></thead>
+        <tbody>
+          <tr><td class="sev-high">Cao</td><td>Corpus không đủ đa dạng</td><td>Nhiều query cùng pattern</td><td>Bổ sung public/open educational data sau kiểm tra license</td></tr>
+          <tr><td class="sev-high">Cao</td><td>Parsing sai layout</td><td>Chunk chứa câu rác/mất heading</td><td>Parser khác hoặc layout-aware extraction</td></tr>
+          <tr><td class="sev-med">Trung bình</td><td>Embedding không phù hợp tiếng Việt/domain</td><td>Dense retrieval miss nhiều gold chunk</td><td>Benchmark 2-3 embedding models</td></tr>
+          <tr><td class="sev-med">Trung bình</td><td>Hybrid không cải thiện</td><td>S3 ≈ S1/S2</td><td>Phân tích query type trước khi giữ hybrid</td></tr>
+          <tr><td class="sev-low">Thấp</td><td>Reranker tăng latency quá nhiều</td><td>p95 latency tăng mạnh</td><td>Giảm candidate K, cache, tắt reranker cho query đơn giản</td></tr>
+          <tr><td class="sev-high">Cao</td><td>LLM hallucination</td><td>Claims không có evidence</td><td>Grounded prompt + abstention + citation validation (mục 8.5)</td></tr>
+          <tr><td class="sev-med">Trung bình</td><td>API cost vượt dự tính</td><td>Token/query tăng bất thường</td><td>Xem ngân sách cụ thể ở mục 18 — cap cứng theo tuần</td></tr>
+          <tr><td class="sev-med">Trung bình</td><td>Scope creep</td><td>Extension chen vào core</td><td>Feature gate: core trước, extension sau</td></tr>
+          <tr><td class="sev-low">Thấp</td><td>OCR lỗi</td><td>OCR text khó đọc</td><td>User confirm/edit OCR output</td></tr>
+          <tr><td class="sev-med">Trung bình</td><td>Tokenizer tiếng Việt lệch giữa index và query</td><td>BM25 recall bất thường thấp</td><td>Unit test cố định: cùng câu input phải ra cùng token ở cả 2 pipeline; freeze phiên bản thư viện tokenizer</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 15 -->
+    <section id="s15">
+      <h2><span class="num">15</span>Bảo mật, quyền riêng tư và trách nhiệm sử dụng</h2>
+      <ul class="plain">
+        <li>Tài liệu cá nhân được xem là dữ liệu nhạy cảm ở cấp hệ thống; chỉ upload dữ liệu nhóm được phép sử dụng.</li>
+        <li>Không log raw documents hoặc query nhạy cảm nếu không cần cho evaluation.</li>
+        <li>Tách metadata, quyền truy cập và indexing theo user nếu triển khai multi-user.</li>
+        <li>Không coi citation là bằng chứng tuyệt đối; người dùng vẫn cần mở nguồn để kiểm tra ở use case quan trọng.</li>
+        <li>Prompt injection từ chính tài liệu retrieved cần được coi là untrusted content; thiết kế instruction rõ ràng để giảm rủi ro.</li>
+      </ul>
+    </section>
+
+    <!-- 16 -->
+    <section id="s16">
+      <h2><span class="num">16</span>Tiêu chí nghiệm thu</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h4>Functional acceptance</h4>
+          <p>Upload thành công định dạng mục tiêu · Indexing hoàn tất, lưu metadata · Text query trả answer + citation · No-answer có abstention · Xem được source snippet/page · Logging đủ để tái hiện evaluation run</p>
+        </div>
+        <div class="card">
+          <h4>Research acceptance</h4>
+          <p>Có S0–S4 · Evaluation set ≥280 câu, Cohen's Kappa ≥0.6 trên mẫu cross-review · Retrieval + answer + system metrics kèm bootstrap CI · Ít nhất một ablation/error analysis · Kết luận gắn với dữ liệu và giới hạn thống kê</p>
+        </div>
+        <div class="card">
+          <h4>Engineering acceptance</h4>
+          <p>Code có cấu trúc, README, reproducible setup · Model/index/tokenizer version được ghi lại · UI demo ổn định · Fallback cho lỗi parsing/retrieval/API</p>
+        </div>
+        <div class="card">
+          <h4>Ngân sách</h4>
+          <p>Không vượt cap API đã định ở mục 18 tại bất kỳ tuần nào · Có log cost theo tuần để đối chiếu</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section id="s17">
+      <h2><span class="num">17</span>Cấu trúc báo cáo và kế hoạch trình bày</h2>
+      <table>
+        <thead><tr><th>Chương</th><th>Tên</th><th>Nội dung</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Introduction</td><td>Bối cảnh, problem, motivation, objectives, contributions</td></tr>
+          <tr><td>2</td><td>Related Work / Background</td><td>LLM, embedding, IR, RAG, reranking, evaluation</td></tr>
+          <tr><td>3</td><td>Dataset & Problem Formulation</td><td>Corpus, QA set, agreement report, task definition</td></tr>
+          <tr><td>4</td><td>Methodology</td><td>Architecture, chunking, retrievers, fusion, reranker, tokenizer, prompting</td></tr>
+          <tr><td>5</td><td>Experiments</td><td>RQ, setups, baselines, metrics, controlled variables, statistical test plan</td></tr>
+          <tr><td>6</td><td>Results & Analysis</td><td>Tables + confidence intervals, error analysis, trade-offs, ablation</td></tr>
+          <tr><td>7</td><td>System Implementation</td><td>API, UI, deployment, logging, demo flow</td></tr>
+          <tr><td>8</td><td>Limitations & Future Work</td><td>OCR, query rewriting, advanced RAG, scaling, statistical power limits</td></tr>
+          <tr><td>9</td><td>Conclusion</td><td>Answer RQs, lessons learned, final system</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 18 -->
+    <section id="s18">
+      <h2><span class="num">18</span>Ngân sách & giới hạn API</h2>
+      <div class="fixed"><span class="tag">FIX</span>Mục mới — bản gốc chỉ liệt kê "API cost cao" là rủi ro nhưng không có số cụ thể.</div>
+      <table>
+        <thead><tr><th>Giai đoạn</th><th>Hoạt động tốn API</th><th>Ước tính request</th><th>Cap đề xuất/tuần</th></tr></thead>
+        <tbody>
+          <tr><td>Tuần 2 (QA seed)</td><td>Sinh câu hỏi thử bằng LLM</td><td>~50-100 request nhỏ</td><td>Model rẻ (mini/flash tier)</td></tr>
+          <tr><td>Tuần 5-6 (S1-S3)</td><td>Generation cho 30-50 câu pilot × 3 baseline</td><td>~150-450 request</td><td>Giới hạn cứng theo ngân sách nhóm tự đặt (vd 1-2 triệu VNĐ/tuần) — mọi thành viên thống nhất trước</td></tr>
+          <tr><td>Tuần 8-9 (Full eval)</td><td>280-320 câu × 5 baseline × 1 lần chạy chính thức</td><td>~1.400-1.600 request</td><td>Đây là đợt tốn nhất — chốt evaluation set và freeze config trước khi chạy để tránh chạy lại nhiều lần</td></tr>
+          <tr><td>Tuần 9 (Faithfulness calibration)</td><td>LLM-as-judge trên 40-50 câu để calibrate với NLI/human</td><td>~50-100 request</td><td>Model rẻ đủ dùng cho judge nếu đã calibrate tốt</td></tr>
+        </tbody>
+      </table>
+      <ul class="plain">
+        <li>Nguyên tắc: dùng model rẻ (mini/flash tier) cho toàn bộ giai đoạn phát triển/debug; chỉ dùng model đắt hơn (nếu cần) cho lần chạy benchmark chính thức cuối cùng.</li>
+        <li>Cache kết quả theo (config, query) để tránh gọi lại API khi chỉ re-run phần phân tích, không đổi hệ thống.</li>
+        <li>Theo dõi cost thực tế theo tuần trong Run log (mục 7.2) — nếu vượt 80% cap ở tuần đó, dừng và review trước khi tiếp tục.</li>
+      </ul>
+    </section>
+
+    <!-- 19 -->
+    <section id="s19">
+      <h2><span class="num">19</span>Kết luận</h2>
+      <p>Proposal v2 định nghĩa dự án như một bài toán AI/IR có đo lường, không chỉ là ứng dụng chatbot — và bổ sung phần vận hành/đo lường mà bản gốc còn thiếu: tokenizer đúng cho tiếng Việt, cỡ mẫu đủ mạnh về thống kê, định nghĩa rõ ràng cho các metric khó (faithfulness, citation correctness), độ tin cậy của quy trình gán nhãn, ngân sách cụ thể, và cách xử lý context nhiều nguồn.</p>
+      <ul class="plain">
+        <li><b>Nguyên tắc 1:</b> Baseline trước, advanced sau.</li>
+        <li><b>Nguyên tắc 2:</b> Tách Retrieval Quality khỏi Generation Quality.</li>
+        <li><b>Nguyên tắc 3:</b> Mọi kỹ thuật mới phải có failure mode/hypothesis/metric.</li>
+        <li><b>Nguyên tắc 4:</b> Demo tốt nhưng không thay thế evaluation.</li>
+        <li><b>Nguyên tắc 5:</b> Kết luận dựa trên benchmark thực tế, có khoảng tin cậy — không khẳng định vượt quá gì dữ liệu cho phép.</li>
+      </ul>
+    </section>
+
+    <!-- 20 -->
+    <section id="s20">
+      <h2><span class="num">20</span>Tài liệu tham khảo định hướng</h2>
+      <ul class="plain">
+        <li>Vaswani et al. (2017). <i>Attention Is All You Need.</i></li>
+        <li>Lewis et al. (2020). <i>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</i></li>
+        <li>Karpukhin et al. (2020). <i>Dense Passage Retrieval for Open-Domain Question Answering.</i></li>
+        <li>Robertson & Zaragoza (2009). <i>The Probabilistic Relevance Framework: BM25 and related work.</i></li>
+        <li>Nogueira & Cho (2019). <i>Passage Re-ranking with BERT.</i></li>
+        <li>Thakur et al. (2021). <i>BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of IR Models.</i></li>
+        <li>Stanford CS224N — Natural Language Processing with Deep Learning.</li>
+        <li>Stanford Information Retrieval Book — Introduction to Information Retrieval.</li>
+        <li>Sentence-Transformers, FAISS, Qdrant documentation.</li>
+        <li>Ragas documentation — RAG evaluation tooling.</li>
+        <li class="fixed" style="list-style:none; margin-left:-22px;"><span class="tag">FIX</span>Laurer et al. (2022). <i>Less Annotating, More Classifying — multilingual NLI for entailment-based evaluation</i> (tham khảo cho faithfulness/citation correctness, mục 8.5).</li>
+        <li class="fixed" style="list-style:none; margin-left:-22px;"><span class="tag">FIX</span>underthesea / pyvi / VnCoreNLP documentation — tham khảo cho Vietnamese word segmentation (mục 10.4).</li>
+      </ul>
+    </section>
+
+    <!-- APPENDIX A -->
+    <section id="appA">
+      <h2><span class="num">A</span>Phụ lục A — Template cho một experiment</h2>
+      <table>
+        <thead><tr><th>Mục</th><th>Nội dung cần ghi</th></tr></thead>
+        <tbody>
+          <tr><td>Hypothesis</td><td>Điều gì dự đoán sẽ thay đổi và vì sao</td></tr>
+          <tr><td>Independent variable</td><td>Thành phần duy nhất được thay đổi</td></tr>
+          <tr><td>Controlled variables</td><td>Model, prompt, K, dataset, context budget…</td></tr>
+          <tr><td>Dataset slice</td><td>Toàn bộ test set hoặc subset có lý do</td></tr>
+          <tr><td>Metrics</td><td>Retrieval + generation + system metrics phù hợp</td></tr>
+          <tr><td>Result</td><td>Số liệu chính + <b>khoảng tin cậy 95% (bootstrap)</b></td></tr>
+          <tr><td>Error analysis</td><td>Ví dụ lỗi đại diện và nguyên nhân</td></tr>
+          <tr><td>Decision</td><td>Giữ, bỏ hay thay đổi component; lý do dựa trên evidence</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- APPENDIX B -->
+    <section id="appB">
+      <h2><span class="num">B</span>Phụ lục B — Checklist trước khi chạy final benchmark</h2>
+      <ul class="checklist">
+        <li>Freeze evaluation set và gold evidence (≥280 câu, Kappa đã đạt ngưỡng)</li>
+        <li>Freeze model versions/prompts/config, bao gồm <b>phiên bản thư viện tokenizer tiếng Việt</b></li>
+        <li>Kiểm tra không leakage giữa corpus và evaluation answer generation</li>
+        <li>Unit test: tokenizer cho cùng input trả cùng token ở pipeline index và pipeline query</li>
+        <li>Run tất cả baseline bằng cùng protocol</li>
+        <li>Lưu raw retrieval results và raw LLM outputs</li>
+        <li>Export bảng metrics kèm bootstrap CI, latency và cost</li>
+        <li>Kiểm tra cost tuần đó chưa vượt cap đã định ở mục 18</li>
+        <li>Chọn failure cases tiêu biểu cho error analysis</li>
+      </ul>
+    </section>
+
+    <footer>Proposal v2 — mọi thay đổi so với bản gốc được đánh dấu <span class="fixed" style="display:inline; padding:1px 7px;"><span class="tag">FIX</span></span> tại đúng vị trí. Bản này thay thế cả Master Plan v2 (docx) và Proposal v1 (pdf) làm nguồn sự thật duy nhất cho nhóm.</footer>
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('nav.toc a[href^="#"]');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  function onScroll(){
+    let current = sections[0];
+    const scrollPos = window.scrollY + 120;
+    for(const s of sections){ if(s.offsetTop <= scrollPos) current = s; }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current.id));
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>

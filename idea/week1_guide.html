@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuần 1 — Hướng dẫn thực hiện chi tiết</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEAE0; --paper-deep:#E4DDCC; --ink:#20262A; --ink-soft:#565F60;
+    --line:#CFC6AE; --gold:#A9793C; --card:#F7F4EC; --radius:3px;
+    --a:#3C6E5D; --b:#3E6B8A; --c:#A9793C; --d:#7A5C99; --e:#9C4A3A;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; font-size:16px; line-height:1.62;}
+  h1,h2,h3,h4{font-family:'Fraunces',serif; font-weight:600; color:var(--ink); letter-spacing:-0.01em;}
+  code{font-family:'IBM Plex Mono',monospace; font-size:0.87em; background:var(--paper-deep); padding:1px 5px; border-radius:2px;}
+  pre{font-family:'IBM Plex Mono',monospace; font-size:0.82rem; background:#1E2426; color:#E9E4D6; padding:14px 16px; border-radius:4px; overflow-x:auto; line-height:1.5;}
+
+  .shell{display:grid; grid-template-columns:230px 1fr; max-width:1300px; margin:0 auto;}
+  @media (max-width:900px){.shell{grid-template-columns:1fr;} nav.toc{position:static !important; height:auto !important; border-right:none !important; border-bottom:1px solid var(--line);}}
+  nav.toc{position:sticky; top:0; height:100vh; overflow-y:auto; padding:32px 18px 40px 28px; border-right:1px solid var(--line);}
+  nav.toc .brand{font-family:'Fraunces',serif; font-size:1rem; font-weight:600; margin-bottom:2px;}
+  nav.toc .brand-sub{font-size:0.75rem; color:var(--ink-soft); margin-bottom:22px;}
+  nav.toc ol{list-style:none; margin:0 0 4px; padding:0;}
+  nav.toc a{display:flex; gap:10px; align-items:center; text-decoration:none; color:var(--ink-soft); font-size:0.85rem; padding:8px 10px; border-radius:var(--radius); border-left:3px solid transparent; transition:background .15s,color .15s;}
+  nav.toc a .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  nav.toc a:hover, nav.toc a.active{background:var(--paper-deep); color:var(--ink);}
+  nav.toc a.active{border-left-color:var(--member-color, var(--gold));}
+
+  main{padding:48px 52px 120px; min-width:0;}
+  @media (max-width:900px){main{padding:32px 20px 90px;}}
+  header.hero{margin-bottom:40px; padding-bottom:28px; border-bottom:1px solid var(--line);}
+  header.hero .kicker{font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--gold); margin-bottom:10px;}
+  header.hero h1{font-size:2rem; line-height:1.2; margin:0 0 12px; max-width:34ch;}
+  header.hero p{font-size:0.95rem; color:var(--ink-soft); max-width:74ch; margin:0 0 18px;}
+  .week-goal{background:var(--card); border-left:3px solid var(--gold); padding:14px 18px; font-size:0.9rem;}
+  .week-goal b{color:var(--gold);}
+
+  section.member{margin-bottom:52px; scroll-margin-top:20px;}
+  .member-head{display:flex; align-items:center; gap:14px; padding-bottom:12px; border-bottom:2px solid var(--member-color); margin-bottom:16px;}
+  .member-head .big-dot{width:15px; height:15px; border-radius:50%; background:var(--member-color); flex-shrink:0;}
+  .member-head h2{font-size:1.4rem; margin:0;}
+  .member-head .role-tag{font-size:0.83rem; color:var(--ink-soft);}
+  .member-head .day-badge{margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--member-color); background:color-mix(in srgb, var(--member-color) 12%, var(--card)); padding:3px 10px; border-radius:20px; white-space:nowrap;}
+
+  ol.howto{list-style:none; margin:0; padding:0; counter-reset:step;}
+  ol.howto > li{counter-increment:step; position:relative; padding:0 0 22px 42px; border-left:2px solid var(--line); margin-left:12px;}
+  ol.howto > li:last-child{border-left-color:transparent; padding-bottom:0;}
+  ol.howto > li::before{
+    content:counter(step);
+    position:absolute; left:-13px; top:0;
+    width:26px; height:26px; border-radius:50%;
+    background:var(--member-color); color:#F7F4EC;
+    font-family:'IBM Plex Mono',monospace; font-size:0.8rem; font-weight:500;
+    display:flex; align-items:center; justify-content:center;
+  }
+  ol.howto h4{font-size:1rem; margin:0 0 6px;}
+  ol.howto p{margin:0 0 8px; font-size:0.9rem; color:var(--ink); }
+  ol.howto p.detail{color:var(--ink-soft); font-size:0.88rem;}
+  ol.howto ul{margin:6px 0 8px; padding-left:20px;}
+  ol.howto li li{font-size:0.87rem; color:var(--ink-soft); margin-bottom:4px; list-style:disc;}
+  .example-box{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px; margin-top:8px; font-size:0.86rem;}
+  .example-box .label{font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:var(--member-color); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px; display:block;}
+
+  .checklist{list-style:none; margin:0; padding:0;}
+  .checklist li{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:0.9rem;}
+  .checklist li::before{content:""; width:14px; height:14px; margin-top:3px; flex-shrink:0; border:1.5px solid var(--ink-soft); border-radius:3px;}
+
+  footer{border-top:1px solid var(--line); padding-top:20px; font-size:0.8rem; color:var(--ink-soft); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="brand">Tuần 1 — Chi tiết</div>
+    <div class="brand-sub">Hướng dẫn từng mục một</div>
+    <ol>
+      <li><a href="#overview" style="--member-color:var(--gold);"><span class="dot" style="background:var(--gold);"></span>Tổng quan tuần</a></li>
+      <li><a href="#member-e" style="--member-color:var(--e);"><span class="dot" style="background:var(--e);"></span>E — PM/QA (làm trước)</a></li>
+      <li><a href="#member-a" style="--member-color:var(--a);"><span class="dot" style="background:var(--a);"></span>A — Data & Ingestion</a></li>
+      <li><a href="#member-b" style="--member-color:var(--b);"><span class="dot" style="background:var(--b);"></span>B — Retrieval Engineer</a></li>
+      <li><a href="#member-c" style="--member-color:var(--c);"><span class="dot" style="background:var(--c);"></span>C — LLM/RAG Engineer</a></li>
+      <li><a href="#member-d" style="--member-color:var(--d);"><span class="dot" style="background:var(--d);"></span>D — Evaluation & Frontend</a></li>
+      <li><a href="#sync" style="--member-color:var(--gold);"><span class="dot" style="background:var(--gold);"></span>Sync cuối tuần</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">TUẦN 1 — SCOPING · HƯỚNG DẪN CHI TIẾT TỪNG MỤC</div>
+      <h1>Tuần đầu tiên: làm gì, làm như thế nào</h1>
+      <p>Mỗi bước dưới đây là một hướng dẫn cụ thể — làm xong bước này mới sang bước kế tiếp. Thứ tự khuyến nghị: E làm bước 1-3 trước (đầu tuần) vì cả nhóm cần repo + đề cương duyệt để bắt đầu; A/B/C/D có thể làm song song từ giữa tuần.</p>
+      <div class="week-goal"><b>Mục tiêu cuối tuần:</b> Đề cương được duyệt, repo + task board sẵn sàng, mỗi role có bản research/draft riêng để bắt tay vào code từ tuần 2.</div>
+    </header>
+
+    <section id="overview" style="margin-bottom:40px;">
+      <h3 style="font-size:1.05rem;">Gợi ý phân bổ theo ngày (5 ngày làm việc)</h3>
+      <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+        <thead><tr style="border-bottom:1px solid var(--ink);"><th style="text-align:left; padding:8px;">Ngày</th><th style="text-align:left; padding:8px;">Việc chính</th></tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--line);"><td style="padding:8px;">Ngày 1 (Thứ 2)</td><td style="padding:8px;">Họp kickoff cả nhóm (30-45 phút) — E trình bày lại RQ/giả thuyết, xác nhận đồng thuận. Sau họp, mỗi người bắt đầu phần research của mình.</td></tr>
+          <tr style="border-bottom:1px solid var(--line);"><td style="padding:8px;">Ngày 2-3</td><td style="padding:8px;">A, B, C, D làm song song phần research/khảo sát riêng. E hoàn thiện đề cương + setup repo/task board.</td></tr>
+          <tr style="border-bottom:1px solid var(--line);"><td style="padding:8px;">Ngày 4</td><td style="padding:8px;">E nộp đề cương. Cả nhóm đẩy draft/note của mình lên repo (không cần hoàn hảo).</td></tr>
+          <tr><td style="padding:8px;">Ngày 5 (Thứ 6)</td><td style="padding:8px;">Sync cuối tuần 30 phút — mỗi người trình bày 2-3 câu về kết quả research, thống nhất quyết định (mục "Sync cuối tuần" bên dưới).</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- MEMBER E FIRST (blocking) -->
+    <section class="member" id="member-e" style="--member-color:var(--e);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>E — PM/QA</h2><div class="role-tag">Nộp đề cương, chốt RQ, setup repo</div></div><span class="day-badge">Làm trước — Ngày 1</span></div>
+      <ol class="howto">
+        <li>
+          <h4>Họp kickoff, đọc lại RQ/giả thuyết cùng cả nhóm</h4>
+          <p class="detail">Dùng lại 5 RQ và 5 giả thuyết (H1-H5) đã có trong Proposal v2 mục 4. Đọc to từng RQ, hỏi từng thành viên có hiểu và đồng ý không — đây là lúc rẻ nhất để sửa hướng nghiên cứu, càng về sau càng tốn công sửa.</p>
+          <div class="example-box"><span class="label">Câu hỏi nên hỏi trong họp</span>"Nếu kết quả cho ra H5 đúng (retrieval quan trọng hơn prompt), nhóm mình có chấp nhận kết luận đó không, hay sẽ cố tune prompt thêm?" — nếu có bất đồng, giải quyết ngay từ đầu.</div>
+        </li>
+        <li>
+          <h4>Hoàn thiện & nộp đề cương chính thức</h4>
+          <p class="detail">Lấy nội dung Proposal v2 đã có, chuyển sang định dạng trường/giảng viên yêu cầu (thường là docx theo template có sẵn). Đừng nộp nguyên bản HTML — trích xuất nội dung, giữ nguyên cấu trúc 19 mục + 2 phụ lục.</p>
+          <ul>
+            <li>Kiểm tra lại: đã có đủ trang bìa, mục lục, số trang theo yêu cầu form trường chưa</li>
+            <li>Xin chữ ký/xác nhận của cả nhóm (nếu trường yêu cầu) trước khi nộp</li>
+          </ul>
+        </li>
+        <li>
+          <h4>Setup GitHub repository</h4>
+          <p class="detail">Tạo repo mới, đặt tên rõ ràng (vd <code>personal-knowledge-assistant</code>). Tạo cấu trúc thư mục ngay từ đầu để cả nhóm không đẩy code lộn xộn:</p>
+          <pre>personal-knowledge-assistant/
+├── data/               # corpus thô + đã xử lý (A phụ trách)
+├── src/
+│   ├── ingestion/      # parser, OCR, cleaning (A)
+│   ├── retrieval/      # embedding, BM25, hybrid, reranker (B)
+│   ├── generation/     # prompt, backend API (C)
+│   └── evaluation/     # metrics, scoring, dashboard (D)
+├── notebooks/          # thử nghiệm nhanh, EDA
+├── docs/               # proposal, master plan, báo cáo
+├── configs/            # file config (embedding model, prompt version...)
+├── README.md
+└── requirements.txt</pre>
+          <ul>
+            <li>Viết README.md khung: tên dự án, mục tiêu ngắn gọn, cách setup môi trường (sẽ điền chi tiết dần)</li>
+            <li>Thêm file <code>.gitignore</code> cho Python (loại trừ <code>__pycache__</code>, <code>.env</code>, file dữ liệu lớn)</li>
+            <li>Mời cả 4 thành viên còn lại làm collaborator</li>
+          </ul>
+        </li>
+        <li>
+          <h4>Setup task board</h4>
+          <p class="detail">Dùng GitHub Projects (tích hợp sẵn với repo, không cần công cụ ngoài) hoặc Trello nếu nhóm quen hơn.</p>
+          <ul>
+            <li>Tạo 4 cột: <code>Backlog</code> → <code>In Progress</code> → <code>Review</code> → <code>Done</code></li>
+            <li>Nhập toàn bộ task Tuần 1 và Tuần 2 từ bảng phân công đã có (mỗi gạch đầu dòng trong step-by-step = 1 card)</li>
+            <li>Gán người phụ trách cho từng card ngay từ đầu</li>
+          </ul>
+        </li>
+        <li>
+          <h4>Setup kênh liên lạc & lịch sync cố định</h4>
+          <p class="detail">Nếu chưa có nhóm chat riêng cho dự án (tách khỏi chat chung của lớp), tạo ngay trên Zalo/Discord.</p>
+          <ul>
+            <li>Chốt 1 khung giờ cố định hàng tuần để sync (vd tối thứ 6, 30 phút) — giữ nguyên suốt 12 tuần, không đổi lịch liên tục</li>
+            <li>Ghim link repo + task board trong nhóm chat để mọi người dễ truy cập</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <!-- MEMBER A -->
+    <section class="member" id="member-a" style="--member-color:var(--a);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>A — Data & Ingestion</h2><div class="role-tag">Khảo sát tài liệu, draft kế hoạch thu thập</div></div><span class="day-badge">Ngày 2-4</span></div>
+      <ol class="howto">
+        <li>
+          <h4>Liệt kê toàn bộ tài liệu nhóm đang có</h4>
+          <p class="detail">Mở tất cả Drive/folder môn học của các thành viên, gom lại thành 1 bảng.</p>
+          <div class="example-box"><span class="label">Cấu trúc bảng đề xuất</span><code>Tên môn | Loại file (slide/note/giáo trình) | Định dạng (pdf/docx/pptx/scan) | Số trang ước tính | Người cung cấp</code></div>
+        </li>
+        <li>
+          <h4>Đánh giá độ đa dạng của corpus hiện có</h4>
+          <p class="detail">Tự hỏi và ghi chú lại từng câu sau — trả lời "chưa" ở câu nào thì đó là việc cần bổ sung:</p>
+          <ul>
+            <li>Đã có tài liệu dạng ảnh scan (không phải PDF text-based) chưa?</li>
+            <li>Đã có tài liệu chứa nhiều bảng biểu/công thức chưa (layout phức tạp)?</li>
+            <li>Có tài liệu từ ít nhất 3 môn/chủ đề khác nhau chưa (tránh corpus quá hẹp)?</li>
+            <li>Có tài liệu "dirty" thật (scan mờ, layout 2 cột, font lạ) chưa — cố ý cần loại này để pipeline không chỉ chạy tốt trên dữ liệu đẹp?</li>
+          </ul>
+        </li>
+        <li>
+          <h4>Ước tính khối lượng cần thu thập thêm</h4>
+          <p class="detail">Đặt mục tiêu cụ thể, ví dụ: tối thiểu 25-30 tài liệu, tổng ~300-500 trang, trải đều 3-4 môn học, có ít nhất 3-5 tài liệu dạng scan.</p>
+        </li>
+        <li>
+          <h4>Viết Data Collection Plan (1 trang)</h4>
+          <p class="detail">Gồm 4 phần: nguồn ưu tiên (môn nào, ai cung cấp), định dạng mục tiêu, deadline thu thập xong (nên là cuối tuần 2), và checklist đa dạng đã liệt kê ở bước 2.</p>
+        </li>
+        <li>
+          <h4>Gửi bản nháp cho E review</h4>
+          <p class="detail">Đăng lên kênh nhóm hoặc PR nhỏ vào thư mục <code>docs/</code> trong repo để E và cả nhóm góp ý trước khi chính thức bắt đầu thu thập ở tuần 2.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- MEMBER B -->
+    <section class="member" id="member-b" style="--member-color:var(--b);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>B — Retrieval Engineer</h2><div class="role-tag">Research embedding model & vector store</div></div><span class="day-badge">Ngày 2-4</span></div>
+      <ol class="howto">
+        <li>
+          <h4>Đọc nhanh bảng xếp hạng MTEB để hiểu cách so sánh embedding model</h4>
+          <p class="detail">Không cần đọc hết — chỉ cần hiểu các tiêu chí so sánh chính: retrieval score, kích thước model, ngôn ngữ hỗ trợ.</p>
+        </li>
+        <li>
+          <h4>Shortlist 3 model cụ thể</h4>
+          <div class="example-box"><span class="label">Ứng viên đề xuất</span>
+            <ul style="margin-top:6px;">
+              <li><b>bge-m3</b> — multilingual, hỗ trợ tiếng Việt tốt, chạy local được, miễn phí</li>
+              <li><b>Vietnamese-SBERT</b> (vd <code>keepitreal/vietnamese-sbert</code>) — huấn luyện riêng cho tiếng Việt, nhẹ hơn</li>
+              <li><b>OpenAI text-embedding-3-small</b> — baseline dễ tích hợp qua API, không cần tự host, nhưng tốn phí</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <h4>Ghi chú ưu/nhược điểm mỗi model</h4>
+          <p class="detail">Lập bảng nhanh: kích thước (MB/params), tốc độ encode ước tính, license (có dùng thương mại/học thuật được không), chạy local hay cần API.</p>
+        </li>
+        <li>
+          <h4>Cài thử 1 model để xác nhận chạy được trên máy</h4>
+          <pre>pip install sentence-transformers
+python -c "
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('BAAI/bge-m3')
+emb = model.encode(['Đây là một câu tiếng Việt thử nghiệm'])
+print(emb.shape)
+"</pre>
+          <p class="detail">Nếu chạy được và ra vector đúng chiều — model sẵn sàng để dùng ở tuần 4.</p>
+        </li>
+        <li>
+          <h4>Research FAISS vs Qdrant</h4>
+          <p class="detail">Đọc nhanh quickstart của cả hai. Ghi chú: FAISS chạy local, không cần service riêng, dễ tái lập cho MVP; Qdrant cần chạy service (Docker) nhưng có nhiều tính năng hybrid search sẵn hơn.</p>
+        </li>
+        <li>
+          <h4>Viết báo cáo so sánh ngắn gửi cả nhóm</h4>
+          <p class="detail">1 bảng + 2-3 câu kết luận đề xuất chọn model/vector store nào cho MVP — dùng làm cơ sở quyết định ở buổi sync cuối tuần.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- MEMBER C -->
+    <section class="member" id="member-c" style="--member-color:var(--c);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>C — LLM/RAG Engineer</h2><div class="role-tag">Research LLM API, draft system prompt v0</div></div><span class="day-badge">Ngày 2-4</span></div>
+      <ol class="howto">
+        <li>
+          <h4>Liệt kê LLM API ứng viên</h4>
+          <div class="example-box"><span class="label">Ứng viên đề xuất</span>
+            <ul style="margin-top:6px;">
+              <li><b>GPT-4o-mini</b> (OpenAI) — rẻ, nhanh, đủ tốt cho giai đoạn phát triển</li>
+              <li><b>Gemini 2.0/2.5 Flash</b> (Google) — rẻ, context window lớn, tiếng Việt ổn</li>
+              <li><b>Qwen2.5</b> (qua API hoặc tự host bằng vLLM nếu có GPU) — mã nguồn mở, kiểm soát chi phí tốt hơn về lâu dài</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <h4>Đăng ký thử API key</h4>
+          <p class="detail">Đăng ký 1-2 candidate, tận dụng free credit nếu có (OpenAI/Google thường có gói dùng thử). Lưu key vào file <code>.env</code>, không commit lên GitHub (đã có trong <code>.gitignore</code> từ bước setup của E).</p>
+        </li>
+        <li>
+          <h4>Test call thử API</h4>
+          <pre>pip install openai
+python -c "
+from openai import OpenAI
+client = OpenAI()
+resp = client.chat.completions.create(
+    model='gpt-4o-mini',
+    messages=[{'role':'user','content':'Xin chào, đây là test kết nối.'}]
+)
+print(resp.choices[0].message.content)
+"</pre>
+        </li>
+        <li>
+          <h4>Soạn thảo system prompt v0</h4>
+          <div class="example-box"><span class="label">Ví dụ prompt v0</span>
+"Bạn là trợ lý trả lời câu hỏi dựa trên tài liệu được cung cấp. Chỉ sử dụng thông tin trong phần CONTEXT bên dưới để trả lời — không dùng kiến thức ngoài. Nếu CONTEXT không đủ thông tin để trả lời, hãy nói rõ 'Tôi không tìm thấy thông tin này trong tài liệu.' Luôn trích dẫn nguồn (tên tài liệu, trang) cho mỗi câu trả lời."
+          </div>
+        </li>
+        <li>
+          <h4>Test thủ công prompt v0</h4>
+          <p class="detail">Copy prompt + 1 đoạn context giả định + 1 câu hỏi vào giao diện chat (ChatGPT/Claude) để xem phản hồi có đúng cấu trúc mong muốn không (có trích nguồn, có từ chối đúng lúc không) — chưa cần code, chỉ cần kiểm tra ý tưởng prompt trước.</p>
+        </li>
+        <li>
+          <h4>Ghi chú điều chỉnh cho tuần 2</h4>
+          <p class="detail">Note lại điểm cần sửa (vd: prompt còn dài dòng, cần ví dụ few-shot) để làm ở bước "Prompt template v1" tuần sau.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- MEMBER D -->
+    <section class="member" id="member-d" style="--member-color:var(--d);">
+      <div class="member-head"><span class="big-dot"></span><div><h2>D — Evaluation & Frontend</h2><div class="role-tag">Research metrics, draft schema evaluation set</div></div><span class="day-badge">Ngày 2-4</span></div>
+      <ol class="howto">
+        <li>
+          <h4>Đọc RAGAS documentation</h4>
+          <p class="detail">Tập trung hiểu 3-4 metric chính: <code>faithfulness</code> (câu trả lời có bám context không), <code>answer_relevancy</code> (trả lời có đúng trọng tâm câu hỏi không), <code>context_precision</code>/<code>context_recall</code> (retrieval có lấy đúng/đủ evidence không). Không cần code ngay, chỉ cần hiểu khái niệm.</p>
+        </li>
+        <li>
+          <h4>Đọc khái niệm NLI cơ bản</h4>
+          <p class="detail">Hiểu 3 nhãn: <i>entailment</i> (câu trả lời được context ủng hộ), <i>contradiction</i> (mâu thuẫn với context), <i>neutral</i> (context không đủ để xác nhận). Đây là nền tảng cho faithfulness scorer sẽ code ở tuần 7.</p>
+        </li>
+        <li>
+          <h4>Thiết kế schema evaluation set</h4>
+          <div class="example-box"><span class="label">Schema đề xuất</span><code>question | gold_answer | gold_chunk_id | doc_id | query_type | difficulty</code>
+          <p style="margin:6px 0 0;">query_type nhận 1 trong 6 giá trị: direct_lookup, semantic, keyword_heavy, multi_document, conversational, no_answer.</p>
+          </div>
+        </li>
+        <li>
+          <h4>Tạo bảng mẫu với 2-3 hàng ví dụ</h4>
+          <p class="detail">Dùng Google Sheets hoặc tạo project Label Studio với schema trên, điền thử 2-3 câu hỏi mẫu (mỗi loại query_type 1 ví dụ) để cả nhóm hình dung cụ thể trước khi viết QA seed thật ở tuần 2.</p>
+        </li>
+        <li>
+          <h4>Gửi schema cho E review</h4>
+          <p class="detail">Xác nhận schema đủ dùng cho cả retrieval eval lẫn generation eval trước khi chốt chính thức — tránh phải đổi schema giữa chừng khi đã có hàng trăm câu hỏi.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- SYNC -->
+    <section id="sync">
+      <h2 style="font-size:1.3rem;">Sync cuối tuần 1 — checklist</h2>
+      <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:-6px;">Họp 30 phút, mỗi người trình bày 2-3 câu, chốt các quyết định sau trước khi bước sang tuần 2:</p>
+      <ul class="checklist">
+        <li>Đề cương đã nộp — có phản hồi/duyệt từ giảng viên chưa (nếu có)?</li>
+        <li>Repo + task board đã sẵn sàng, mọi người đã có quyền truy cập?</li>
+        <li>Data Collection Plan của A — cả nhóm đồng ý mục tiêu số lượng/đa dạng chưa?</li>
+        <li>Chốt embedding model + vector store (từ báo cáo của B)</li>
+        <li>Chốt LLM API dùng cho MVP (từ research của C)</li>
+        <li>Schema evaluation set (từ D) — đã đủ field cho cả retrieval và generation eval chưa?</li>
+        <li>Xác nhận lịch sync cố định hàng tuần cho 11 tuần còn lại</li>
+      </ul>
+    </section>
+
+    <footer>Nếu một mục nào chưa xong đúng hạn tuần 1, ưu tiên xử lý ở đầu tuần 2 trước khi bắt đầu ingestion — đừng để nợ dồn sang tuần 3 vì tuần 3 đã là mốc "Ingestion pipeline chạy được" trong timeline chính.</footer>
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('nav.toc a[href^="#"]');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  function onScroll(){
+    let current = sections[0];
+    const scrollPos = window.scrollY + 120;
+    for(const s of sections){ if(s.offsetTop <= scrollPos) current = s; }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current.id));
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>

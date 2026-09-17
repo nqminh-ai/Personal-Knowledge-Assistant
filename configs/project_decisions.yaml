@@ -1,0 +1,62 @@
+project:
+  name: personal-knowledge-assistant
+  current_week: 1
+  source_of_truth:
+    - idea/proposal_v2.html
+    - idea/weekly_assignment.html
+    - idea/step_by_step_members.html
+    - idea/week1_guide.html
+
+week1_decisions:
+  status: draft
+  corpus_target:
+    min_documents: 25
+    target_pages: "300-500"
+    required_formats:
+      - pdf
+      - docx
+      - pptx
+      - scanned_image_or_scan_pdf
+    required_diversity:
+      min_subjects: 3
+      include_dirty_layouts: true
+
+  metadata_schema_version: v0
+  evaluation_schema_version: v0
+
+  retrieval_mvp:
+    embedding_model: BAAI/bge-m3
+    vector_store: FAISS
+    sparse_retrieval: BM25
+    vietnamese_tokenizer_candidates:
+      - underthesea
+      - pyvi
+      - VnCoreNLP
+    fusion_method: reciprocal_rank_fusion
+
+  generation_mvp:
+    llm_candidates:
+      - gpt-4o-mini_or_current_low_cost_openai_model
+      - gemini_flash
+      - qwen_api_or_local
+    citation_format: "[doc_id, page, chunk_id]"
+    abstention_message: "I cannot find enough information in the provided documents."
+
+  evaluation:
+    target_questions: "280-320"
+    pilot_questions: "30-50"
+    min_questions_per_query_type: 45
+    query_types:
+      - direct_lookup
+      - semantic
+      - keyword_heavy
+      - multi_document
+      - conversational
+      - no_answer
+    agreement_metric: cohens_kappa
+    agreement_threshold: 0.6
+
+open_items:
+  - Choose final LLM provider after API/cost test.
+  - Choose Vietnamese tokenizer after a small BM25 sanity test.
+  - Confirm weekly sync time.
