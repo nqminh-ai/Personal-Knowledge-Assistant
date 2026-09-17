@@ -50,6 +50,18 @@ pip install -r requirements.txt
 
 API keys must stay in `.env` and must not be committed.
 
+## Week 1 Smoke Tests
+
+```powershell
+pip install -r requirements.txt
+python scripts/sanity_embedding.py
+python scripts/sanity_llm.py
+```
+
+The embedding test downloads `BAAI/bge-m3` on its first run. The LLM test uses
+`OPENAI_API_KEY` or `GEMINI_API_KEY` from `.env`; without either key it exits
+cleanly with a `SKIP` message.
+
 ## Roles
 
 - A - Data & Ingestion: corpus, parsing, OCR, metadata, Vietnamese word segmentation.

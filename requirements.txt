@@ -1,0 +1,12 @@
+sentence-transformers
+faiss-cpu
+openai
+google-genai
+pyyaml
+pydantic
+python-dotenv
+underthesea
+python-docx
+pypdf
+python-pptx
+pytest
