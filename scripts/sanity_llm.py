@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     load_dotenv()
     question = "Theo CONTEXT, hệ thống cần làm gì khi không có đủ bằng chứng?"
     context = "Nếu không tìm thấy đủ bằng chứng trong tài liệu, trợ lý phải nói rõ rằng chưa đủ thông tin."
@@ -20,7 +22,20 @@ def main() -> int:
     )
 
     started = time.perf_counter()
-    if os.getenv("OPENAI_API_KEY"):
+    if os.getenv("GEMINI_API_KEY"):
+        try:
+            from google import genai
+        except ImportError:
+            print("Missing dependency: google-genai")
+            return 2
+        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        response = client.models.generate_content(
+            model=os.getenv("GEMINI_MODEL", "gemini-3.5-flash"),
+            contents=prompt,
+        )
+        answer = response.text or ""
+        provider = "Gemini"
+    elif os.getenv("OPENAI_API_KEY"):
         try:
             from openai import OpenAI
         except ImportError:
@@ -34,19 +49,6 @@ def main() -> int:
         )
         answer = response.choices[0].message.content or ""
         provider = "OpenAI"
-    elif os.getenv("GEMINI_API_KEY"):
-        try:
-            from google import genai
-        except ImportError:
-            print("Missing dependency: google-genai")
-            return 2
-        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-        response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-            contents=prompt,
-        )
-        answer = response.text or ""
-        provider = "Gemini"
     else:
         print("SKIP: set OPENAI_API_KEY or GEMINI_API_KEY in .env to run the API test")
         return 0

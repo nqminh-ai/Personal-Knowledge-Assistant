@@ -11,7 +11,7 @@
 
 - [x] Data collection plan is drafted.
 - [x] Metadata schema v0 is drafted.
-- [ ] Corpus target is agreed by the team.
+- [x] Corpus target is agreed by the team.
 
 ## B - Retrieval
 
@@ -34,5 +34,5 @@
 ## E - Research/PM/QA
 
 - [x] Week 1 decisions are recorded in `configs/project_decisions.yaml`.
-- [ ] Open questions are assigned owners.
+- [x] Open questions are assigned owners.
 - [x] Week 2 kickoff tasks are ready.

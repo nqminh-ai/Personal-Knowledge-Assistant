@@ -8,7 +8,7 @@ project:
     - idea/week1_guide.html
 
 week1_decisions:
-  status: draft
+  status: approved
   corpus_target:
     min_documents: 25
     target_pages: "300-500"
@@ -28,17 +28,20 @@ week1_decisions:
     embedding_model: BAAI/bge-m3
     vector_store: FAISS
     sparse_retrieval: BM25
+    vietnamese_tokenizer: pyvi
     vietnamese_tokenizer_candidates:
-      - underthesea
       - pyvi
-      - VnCoreNLP
+      - underthesea
+    owner: "B - Retrieval Engineer"
     fusion_method: reciprocal_rank_fusion
 
   generation_mvp:
+    primary_llm: gemini-3.5-flash
     llm_candidates:
+      - gemini-3.5-flash
       - gpt-4o-mini_or_current_low_cost_openai_model
-      - gemini_flash
       - qwen_api_or_local
+    owner: "C - LLM/RAG Engineer"
     citation_format: "[doc_id, page, chunk_id]"
     abstention_message: "I cannot find enough information in the provided documents."
 
@@ -55,8 +58,19 @@ week1_decisions:
       - no_answer
     agreement_metric: cohens_kappa
     agreement_threshold: 0.6
+    owner: "D - Evaluation & Frontend"
+
+  sync_schedule:
+    frequency: daily
+    time: "21:00 (9:00 PM)"
+    owner: "E - PM/QA"
 
 open_items:
-  - Choose final LLM provider after API/cost test.
-  - Choose Vietnamese tokenizer after a small BM25 sanity test.
-  - Confirm weekly sync time.
+  - status: resolved
+    item: Choose final LLM provider -> Gemini 3.5 Flash (Owner: C)
+  - status: resolved
+    item: Choose Vietnamese tokenizer -> pyvi (Owner: B)
+  - status: resolved
+    item: Confirm sync time -> 21:00 daily (Owner: E)
+  - status: resolved
+    item: Collect and finalize corpus -> 41 documents collected and indexed in data/metadata/documents.csv (Owner: A)
